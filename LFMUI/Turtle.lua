@@ -1,39 +1,97 @@
-local FRAME_CONFIG = {
-  SIZE = {384, 512},
+---------------------------------------------------------------------------------
+--                      Turtle_Minimal.lua - Interface Pure                   --
+---------------------------------------------------------------------------------
+
+-- Configuration consolidée
+local CONFIG = {
+  -- Dimensions principales
+  MAIN_FRAME = {384, 512},
   ROLE_SIZE = {54, 54},
   BUTTON_SIZE = {104, 21},
   ENTRY_HEIGHT = 20,
-  POSITION = {0, -104},
+  CHECKBOX_SIZE = {16, 16},
+  CHECKBOX_SIZE_LARGE = {18, 18},
+  ICON_SIZE = {16, 16},
+  PORTRAIT_SIZE = {64, 64},
+  
+  -- Positions
+  FRAME_POSITION = {0, -104},
+  SCROLL_POSITION = {25, -158},
   TAB_POSITIONS = {
-    {20, 45},
-    {110, 45},
-    {250, 45}
+    {20, 45}, {110, 45}, {250, 45}
+  },
+  
+  -- Tailles de scroll
+  SCROLL_SIZES = {
+    DUNGEON = {295, 252},
+    RAID = {295, 220}
+  },
+  
+  -- Slider de raid
+  SLIDER = {
+    SIZE = {295, 30},
+    EDITBOX_SIZE = {25, 20},
+    SLIDER_SIZE = {120, 17},
+    MIN_VALUE = 10,
+    MAX_VALUE = 40,
+    DEFAULT_VALUE = 25
+  },
+  
+  -- More tab
+  MORE_TAB = {
+    SIZE = {295, 250},
+    POSITION = {25, -170},
+    INTERVAL_SLIDER_SIZE = {140, 17},
+    INTERVAL_MIN = 40,
+    INTERVAL_MAX = 120,
+    INTERVAL_DEFAULT = 80,
+    CHANNEL_SPACING = 20
   }
 }
 
+-- Textures
 local TEXTURES = {
   PORTRAIT = "Interface\\AddOns\\AutoLFM\\icon\\portrait",
   FRAME = "Interface\\FrameXML\\LFT\\images\\ui-lfg-frame",
   BACKGROUND = "Interface\\FrameXML\\LFT\\images\\ui-lfg-background-dungeonwall",
   TAB_ACTIVE = "Interface\\PaperDollInfoFrame\\UI-Character-ActiveTab",
   TAB_INACTIVE = "Interface\\PaperDollInfoFrame\\UI-Character-InactiveTab",
-  TAB_HIGHLIGHT = "Interface\\PaperDollInfoFrame\\UI-Character-Tab-Highlight"
+  TAB_HIGHLIGHT = "Interface\\PaperDollInfoFrame\\UI-Character-Tab-Highlight",
+  SLIDER_THUMB = "Interface\\Buttons\\UI-SliderBar-Button-Horizontal"
 }
 
+-- Icônes du More tab
+local MORE_ICONS = {
+  INTERVAL = "Interface\\GossipFrame\\HealerGossipIcon",
+  CHANNELS = "Interface\\GossipFrame\\GossipGossipIcon",
+  DURATION = "Interface\\GossipFrame\\VendorGossipIcon",
+  SENT = "Interface\\GossipFrame\\TrainerGossipIcon",
+  NEXT = "Interface\\GossipFrame\\TaxiGossipIcon"
+}
+
+-- Couleurs
 local COLORS = {
   TAB_ACTIVE = {0.8, 0.8, 0.8},
   TAB_INACTIVE = {1, 0.82, 0},
-  ROLE_BG_ALPHA = 0.6
+  ROLE_BG_ALPHA = 0.6,
+  WHITE = {1, 1, 1},
+  SELECTION_HIGHLIGHT = {0, 1, 0, 0.3},
+  TRANSPARENT = {0, 0, 0, 0},
+  EDITBOX_BG = {0, 0, 0, 0.5},
+  EDITBOX_BORDER = {0.4, 0.4, 0.4, 1},
+  
+  LEVEL_COLORS = {
+    TRIVIAL = {0.5, 0.5, 0.5},
+    EASY = {0.0, 1.0, 0.0},
+    NORMAL = {1.0, 1.0, 0.0},
+    DIFFICULT = {1.0, 0.5, 0.0},
+    VERY_DIFFICULT = {1.0, 0.0, 0.0}
+  }
 }
 
-local SLIDER_CONFIG = {
-  SIZE = {295, 30},
-  EDITBOX_SIZE = {25, 20},
-  SLIDER_SIZE = {120, 17},
-  MIN_VALUE = 10,
-  MAX_VALUE = 40,
-  DEFAULT_VALUE = 25,
-  BACKDROP = {
+-- Backdrops standardisés
+local BACKDROPS = {
+  DIALOG = {
     bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background", 
     edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border", 
     tile = true, 
@@ -41,22 +99,43 @@ local SLIDER_CONFIG = {
     edgeSize = 8, 
     insets = {left = 4, right = 4, top = 4, bottom = 4}
   },
-  SLIDER_BACKDROP = {
+  
+  TOOLTIP = {
+    bgFile = "Interface\\ChatFrame\\ChatFrameBackground",
+    edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+    tile = true,
+    tileSize = 16,
+    edgeSize = 16,
+    insets = {left = 5, right = 5, top = 5, bottom = 5}
+  },
+  
+  SLIDER = {
     bgFile = "Interface\\Buttons\\UI-SliderBar-Background", 
     edgeFile = "Interface\\Buttons\\UI-SliderBar-Border", 
     tile = true, 
     tileSize = 8, 
     edgeSize = 8, 
     insets = {left = 3, right = 3, top = 6, bottom = 6}
+  },
+  
+  ENTRY_SELECTION = {
+    bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
+    edgeFile = nil,
+    tile = true,
+    tileSize = 16,
+    edgeSize = 16,
+    insets = {left = 4, right = 4, top = 4, bottom = 4}
+  },
+  
+  SIMPLE_TILE = {
+    tile = true,
+    tileSize = 32,
+    edgeSize = 8,
+    insets = {left = 4, right = 4, top = 4, bottom = 4}
   }
 }
 
-local SCROLL_CONFIG = {
-  POSITION = {25, -158},
-  DUNGEON_SIZE = {295, 252},
-  RAID_SIZE = {295, 220}
-}
-
+-- Données des rôles
 local ROLE_DATA = {
   {
     name = "Tank",
@@ -78,30 +157,143 @@ local ROLE_DATA = {
   }
 }
 
--- Utility functions
+-- Canaux de diffusion
+local BROADCAST_CHANNELS = {"LookingForGroup", "World", "General"}
+
+---------------------------------------------------------------------------------
+--                           Variables d'état                                  --
+---------------------------------------------------------------------------------
+
+local showingRaids = false
+local currentScrollContent = nil
+local selectedRaid = nil
+local CurrentTab = 1
+local tabs = {}
+local roleButtons = {}
+local roleChecks = {}
+local sliderValue = CONFIG.SLIDER.DEFAULT_VALUE
+
+-- Cache des données d'instance
+local instanceDataCache = {
+  dungeons = nil,
+  raids = nil,
+  lastUpdate = 0,
+  cacheTimeout = 5
+}
+
+-- Références des composants UI
+local uiComponents = {
+  mainFrame = nil,
+  raidSizeControls = nil,
+  moreTabContent = nil
+}
+
+-- Frames pour gestion des backdrops
+local donjonClickableFrames = {}
+local raidClickableFrames = {}
+
+---------------------------------------------------------------------------------
+--                    Fonctions utilitaires                                    --
+---------------------------------------------------------------------------------
+
 local function setSize(obj, w, h)
+  if not obj or not w or not h then return end
   obj:SetWidth(w)
   obj:SetHeight(h)
 end
 
--- Main frame creation
+local function validateInstanceData()
+  local hasDonjons = donjons and type(donjons) == "table" and table.getn(donjons) > 0
+  local hasRaids = raids and type(raids) == "table" and table.getn(raids) > 0
+  
+  if not hasDonjons and not hasRaids then
+    DEFAULT_CHAT_FRAME:AddMessage("AutoLFM Warning: No instance data found. Make sure Variables.lua is loaded.")
+    return false
+  end
+  
+  return true
+end
+
+local function getLevelColor(minLevel, maxLevel)
+  local playerLevel = UnitLevel("player")
+  if not playerLevel or playerLevel == 0 then
+    return COLORS.LEVEL_COLORS.NORMAL
+  end
+  
+  local instanceLevel = math.floor((minLevel + maxLevel) / 2)
+  local levelDiff = instanceLevel - playerLevel
+  
+  if levelDiff <= -10 then
+    return COLORS.LEVEL_COLORS.TRIVIAL
+  elseif levelDiff <= -4 then
+    return COLORS.LEVEL_COLORS.EASY
+  elseif levelDiff <= 2 then
+    return COLORS.LEVEL_COLORS.NORMAL
+  elseif levelDiff <= 5 then
+    return COLORS.LEVEL_COLORS.DIFFICULT
+  else
+    return COLORS.LEVEL_COLORS.VERY_DIFFICULT
+  end
+end
+
+local function getInstanceData()
+  local currentTime = GetTime()
+  
+  if instanceDataCache.dungeons and instanceDataCache.raids and 
+     (currentTime - instanceDataCache.lastUpdate) < instanceDataCache.cacheTimeout then
+    return instanceDataCache.dungeons, instanceDataCache.raids
+  end
+  
+  local dungeonData = donjons or {}
+  local raidData = raids or {}
+  
+  instanceDataCache.dungeons = dungeonData
+  instanceDataCache.raids = raidData
+  instanceDataCache.lastUpdate = currentTime
+  
+  return dungeonData, raidData
+end
+
+function ClearAllBackdrops(frameList)
+  for _, frame in ipairs(frameList) do
+    if frame and frame.SetBackdropColor then
+      frame:SetBackdropColor(unpack(COLORS.TRANSPARENT))
+    end
+  end
+end
+
+---------------------------------------------------------------------------------
+--                    Création d'interface - Frame Principal                   --
+---------------------------------------------------------------------------------
+
 local function createMainFrame()
   local frame = CreateFrame("Frame", "AutoLFMTurtleFrame", UIParent)
-  setSize(frame, FRAME_CONFIG.SIZE[1], FRAME_CONFIG.SIZE[2])
-  frame:SetPoint("TOPLEFT", UIParent, "TOPLEFT", FRAME_CONFIG.POSITION[1], FRAME_CONFIG.POSITION[2])
+  setSize(frame, CONFIG.MAIN_FRAME[1], CONFIG.MAIN_FRAME[2])
+  frame:SetPoint("TOPLEFT", UIParent, "TOPLEFT", CONFIG.FRAME_POSITION[1], CONFIG.FRAME_POSITION[2])
   frame:EnableMouse(true)
   frame:SetMovable(true)
   frame:RegisterForDrag("LeftButton")
-  frame:SetScript("OnDragStart", function() this:StartMoving() end)
-  frame:SetScript("OnDragStop", function() this:StopMovingOrSizing() end)
+  
+  frame:SetScript("OnDragStart", function() 
+    if this and this.StartMoving then
+      this:StartMoving() 
+    end
+  end)
+  frame:SetScript("OnDragStop", function() 
+    if this and this.StopMovingOrSizing then
+      this:StopMovingOrSizing() 
+    end
+  end)
   frame:Hide()
+  
+  uiComponents.mainFrame = frame
   return frame
 end
 
 local function createFrameElements(frame)
   local portrait = frame:CreateTexture(nil, "BACKGROUND")
   portrait:SetTexture(TEXTURES.PORTRAIT)
-  setSize(portrait, 64, 64)
+  setSize(portrait, CONFIG.PORTRAIT_SIZE[1], CONFIG.PORTRAIT_SIZE[2])
   portrait:SetPoint("TOPLEFT", 7, -6)
 
   local title = frame:CreateFontString("AutoLFMTurtleFrameTitle", "OVERLAY", "GameFontNormal")
@@ -123,129 +315,166 @@ local function createFrameElements(frame)
   bgWall:SetPoint("TOP", 85, -155)
 end
 
-local AutoLFMTurtleFrame = createMainFrame()
-local frameElements = createFrameElements(AutoLFMTurtleFrame)
-
-local function setupPlaceholder(editBox, text)
-  local placeholder = editBox:CreateFontString(nil, "OVERLAY", "GameFontDisable")
-  placeholder:SetText(text)
-  placeholder:SetPoint("CENTER", editBox, "CENTER", 0, 0)
-  local function updatePlaceholder()
-    if editBox:GetText() == "" then placeholder:Show() else placeholder:Hide() end
-  end
-  editBox:SetScript("OnEditFocusGained", function() placeholder:Hide() end)
-  editBox:SetScript("OnEditFocusLost", updatePlaceholder)
-  editBox:SetScript("OnTextChanged", updatePlaceholder)
-  updatePlaceholder()
+local function createEditBox(parent)
+  local frame = CreateFrame("Frame", "AutoLFMTurtleFrameEditBox", parent)
+  setSize(frame, 330, 30)
+  frame:SetPoint("TOP", parent, "TOP", -10, -125)
+  
+  frame:SetBackdrop(BACKDROPS.TOOLTIP)
+  frame:SetBackdropColor(unpack(COLORS.EDITBOX_BG))
+  frame:SetBackdropBorderColor(unpack(COLORS.EDITBOX_BORDER))
+  
+  local placeholder = frame:CreateFontString(nil, "OVERLAY", "GameFontDisable")
+  placeholder:SetText("DynamicMessage")
+  placeholder:SetPoint("CENTER", frame, "CENTER", 0, 0)
+  placeholder:SetTextColor(unpack(COLORS.WHITE))
+  
+  return frame
 end
-local editBox = CreateFrame("EditBox", "AutoLFMTurtleFrameEditBox", AutoLFMTurtleFrame, "InputBoxTemplate")
-  setSize(editBox, 250, 32)
-  editBox:SetPoint("TOP", AutoLFMTurtleFrame, "TOP", -10, -125)
-  editBox:SetAutoFocus(false)
-  editBox:SetMaxLetters(50)
-  setupPlaceholder(editBox, "Add broadcast details")
 
--- Raid size controls
 local function createRaidSizeControls(parent)
   local sliderBg = CreateFrame("Frame", nil, parent)
-  setSize(sliderBg, SLIDER_CONFIG.SIZE[1], SLIDER_CONFIG.SIZE[2])
+  setSize(sliderBg, CONFIG.SLIDER.SIZE[1], CONFIG.SLIDER.SIZE[2])
   sliderBg:SetPoint("BOTTOM", parent, "BOTTOM", -20, 105)
-  sliderBg:SetBackdrop(SLIDER_CONFIG.BACKDROP)
+  sliderBg:SetBackdrop(BACKDROPS.DIALOG)
   sliderBg:Hide()
+  
   local label = sliderBg:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   label:SetText("Group Size:")
   label:SetPoint("LEFT", sliderBg, "LEFT", 10, 0)
+  
   local sizeEditBox = CreateFrame("EditBox", "AutoLFMTurtleFrameSizeEditBox", sliderBg, "InputBoxTemplate")
-  setSize(sizeEditBox, SLIDER_CONFIG.EDITBOX_SIZE[1], SLIDER_CONFIG.EDITBOX_SIZE[2])
+  setSize(sizeEditBox, CONFIG.SLIDER.EDITBOX_SIZE[1], CONFIG.SLIDER.EDITBOX_SIZE[2])
   sizeEditBox:SetPoint("LEFT", label, "RIGHT", 25, 0)
   sizeEditBox:SetAutoFocus(false)
   sizeEditBox:SetMaxLetters(2)
-  sizeEditBox:SetText(tostring(SLIDER_CONFIG.DEFAULT_VALUE))
+  sizeEditBox:SetText(tostring(CONFIG.SLIDER.DEFAULT_VALUE))
+  
   local slider = CreateFrame("Slider", "AutoLFMTurtleFrameRaidSizeSlider", sliderBg)
-  setSize(slider, SLIDER_CONFIG.SLIDER_SIZE[1], SLIDER_CONFIG.SLIDER_SIZE[2])
+  setSize(slider, CONFIG.SLIDER.SLIDER_SIZE[1], CONFIG.SLIDER.SLIDER_SIZE[2])
   slider:SetPoint("LEFT", sizeEditBox, "RIGHT", 20, 0)
-  slider:SetMinMaxValues(SLIDER_CONFIG.MIN_VALUE, SLIDER_CONFIG.MAX_VALUE)
-  slider:SetValue(SLIDER_CONFIG.DEFAULT_VALUE)
+  slider:SetMinMaxValues(CONFIG.SLIDER.MIN_VALUE, CONFIG.SLIDER.MAX_VALUE)
+  slider:SetValue(CONFIG.SLIDER.DEFAULT_VALUE)
   slider:SetValueStep(1)
   slider:SetOrientation("HORIZONTAL")
-  slider:SetThumbTexture("Interface\\Buttons\\UI-SliderBar-Button-Horizontal")
-  slider:SetBackdrop(SLIDER_CONFIG.SLIDER_BACKDROP)
+  slider:SetThumbTexture(TEXTURES.SLIDER_THUMB)
+  slider:SetBackdrop(BACKDROPS.SLIDER)
+  
   slider:SetScript("OnValueChanged", function()
     local value = slider:GetValue()
     sizeEditBox:SetText(tostring(value))
+    sliderValue = value
   end)
+  
   sizeEditBox:SetScript("OnTextChanged", function()
     local value = tonumber(sizeEditBox:GetText())
-    if value and value >= SLIDER_CONFIG.MIN_VALUE and value <= SLIDER_CONFIG.MAX_VALUE then
+    if value and value >= CONFIG.SLIDER.MIN_VALUE and value <= CONFIG.SLIDER.MAX_VALUE then
       slider:SetValue(value)
     end
   end)
-  return {
+  
+  local controls = {
     background = sliderBg,
     label = label,
     editBox = sizeEditBox,
     slider = slider
   }
+  
+  uiComponents.raidSizeControls = controls
+  return controls
 end
-
-local raidSizeControls = createRaidSizeControls(AutoLFMTurtleFrame)
-
--- Instance list management
-local showingRaids = false
-local currentScrollContent = nil
-local selectedRaid = nil
-local selectedDungeons = {}
-
-local function getInstanceData()
-  local dungeonData = {}
-  local raidData = {}
-  
-  if type(donjons) == "table" and table.getn(donjons) > 0 then
-    dungeonData = donjons
-  end
-  
-  if type(raids) == "table" and table.getn(raids) > 0 then
-    raidData = raids
-  end
-  
-  return dungeonData, raidData
-end
-
-local donjons, raids = getInstanceData()
 
 local function createScrollFrame(parent)
   local scrollFrame = CreateFrame("ScrollFrame", "AutoLFMTurtleFrameInstancesList", parent, "UIPanelScrollFrameTemplate")
-  scrollFrame:SetPoint("TOPLEFT", parent, "TOPLEFT", SCROLL_CONFIG.POSITION[1], SCROLL_CONFIG.POSITION[2])
+  scrollFrame:SetPoint("TOPLEFT", parent, "TOPLEFT", CONFIG.SCROLL_POSITION[1], CONFIG.SCROLL_POSITION[2])
   scrollFrame:SetFrameLevel(parent:GetFrameLevel() + 1)
+  
   return scrollFrame
 end
 
 local function updateScrollFrameSize(scrollFrame)
-  if showingRaids then
-    setSize(scrollFrame, SCROLL_CONFIG.RAID_SIZE[1], SCROLL_CONFIG.RAID_SIZE[2])
-  else
-    setSize(scrollFrame, SCROLL_CONFIG.DUNGEON_SIZE[1], SCROLL_CONFIG.DUNGEON_SIZE[2])
-  end
+  if not scrollFrame then return end
+  
+  local size = showingRaids and CONFIG.SCROLL_SIZES.RAID or CONFIG.SCROLL_SIZES.DUNGEON
+  setSize(scrollFrame, size[1], size[2])
 end
+
+---------------------------------------------------------------------------------
+--                    Gestion des listes d'instances                           --
+---------------------------------------------------------------------------------
 
 local function createInstanceEntry(parent, instance, index, isRaid)
   local entry = CreateFrame("Frame", nil, parent)
-  setSize(entry, 295, FRAME_CONFIG.ENTRY_HEIGHT)
-  entry:SetPoint("TOPLEFT", 0, -(index-1)*FRAME_CONFIG.ENTRY_HEIGHT)
+  setSize(entry, 295, CONFIG.ENTRY_HEIGHT)
+  entry:SetPoint("TOPLEFT", 0, -(index-1)*CONFIG.ENTRY_HEIGHT)
+  
+  entry:SetBackdrop(BACKDROPS.ENTRY_SELECTION)
+  entry:SetBackdropColor(unpack(COLORS.TRANSPARENT))
+  
   local check = CreateFrame("CheckButton", nil, entry, "OptionsCheckButtonTemplate")
-  setSize(check, 20, 20)
+  setSize(check, CONFIG.CHECKBOX_SIZE_LARGE[1], CONFIG.CHECKBOX_SIZE_LARGE[2])
   check:SetPoint("TOPLEFT", entry, "TOPLEFT")
   
   check.instanceData = instance
   check.isRaid = isRaid
+  check.entry = entry
   
   check:SetScript("OnClick", function()
-    -- Selection logic handled by API
+    local isChecked = check:GetChecked()
+    
+    if isRaid then
+      ClearAllBackdrops(raidClickableFrames)
+      
+      if isChecked then
+        selectedRaid = instance.abrev
+        entry:SetBackdropColor(unpack(COLORS.SELECTION_HIGHLIGHT))
+        
+        if uiComponents.raidSizeControls then
+          local controls = uiComponents.raidSizeControls
+          local slider = controls.slider
+          local editBox = controls.editBox
+          
+          if slider and editBox and instance.size_min and instance.size_max then
+            slider:SetMinMaxValues(instance.size_min, instance.size_max)
+            slider:SetValue(instance.size_min)
+            editBox:SetText(tostring(instance.size_min))
+            sliderValue = instance.size_min
+          end
+        end
+        
+        local children = {parent:GetChildren()}
+        for _, child in ipairs(children) do
+          local childFrames = {child:GetChildren()}
+          for _, childFrame in ipairs(childFrames) do
+            if childFrame ~= check and childFrame.GetChecked then
+              childFrame:SetChecked(nil)
+            end
+          end
+        end
+      else
+        selectedRaid = nil
+        entry:SetBackdropColor(unpack(COLORS.TRANSPARENT))
+      end
+    else
+      if isChecked then
+        entry:SetBackdropColor(unpack(COLORS.SELECTION_HIGHLIGHT))
+      else
+        entry:SetBackdropColor(unpack(COLORS.TRANSPARENT))
+      end
+    end
   end)
   
   local name = entry:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   name:SetText(instance.nom or instance.name or "Unknown")
   name:SetPoint("LEFT", entry, "LEFT", 20, 0)
+  
+  if not isRaid then
+    local lvlMin = instance.lvl_min or 0
+    local lvlMax = instance.lvl_max or 0
+    local color = getLevelColor(lvlMin, lvlMax)
+    name:SetTextColor(color[1], color[2], color[3])
+  end
+  
   local info = entry:CreateFontString(nil, "OVERLAY", "GameFontNormal")
   if isRaid then
     local sizeMin = instance.size_min or 0
@@ -255,22 +484,30 @@ local function createInstanceEntry(parent, instance, index, isRaid)
     else
       info:SetText(sizeMin .. "-" .. sizeMax)
     end
+    info:SetTextColor(unpack(COLORS.WHITE))
   else
     local lvlMin = instance.lvl_min or 0
     local lvlMax = instance.lvl_max or 0
     info:SetText(lvlMin .. "-" .. lvlMax)
+    
+    local color = getLevelColor(lvlMin, lvlMax)
+    info:SetTextColor(color[1], color[2], color[3])
   end
   info:SetPoint("RIGHT", entry, "RIGHT", -10, 0)
-  return entry, check
+  
+  if isRaid then
+    table.insert(raidClickableFrames, entry)
+  else
+    table.insert(donjonClickableFrames, entry)
+  end
+  
+  return entry
 end
 
 local function clearScrollContent()
   if currentScrollContent then
-    local children = {currentScrollContent:GetChildren()}
-    for _, child in ipairs(children) do
-      child:Hide()
-    end
     currentScrollContent:Hide()
+    currentScrollContent = nil
   end
 end
 
@@ -278,13 +515,20 @@ local function updateInstanceList()
   local scrollFrame = getglobal("AutoLFMTurtleFrameInstancesList")
   if not scrollFrame then return end
   
+  local donjons, raids = getInstanceData()
   local data = showingRaids and raids or donjons
   
-  if raidSizeControls and raidSizeControls.background then
+  if showingRaids then
+    raidClickableFrames = {}
+  else
+    donjonClickableFrames = {}
+  end
+  
+  if uiComponents.raidSizeControls and uiComponents.raidSizeControls.background then
     if showingRaids then
-      raidSizeControls.background:Show()
+      uiComponents.raidSizeControls.background:Show()
     else
-      raidSizeControls.background:Hide()
+      uiComponents.raidSizeControls.background:Hide()
     end
   end
   
@@ -294,7 +538,8 @@ local function updateInstanceList()
     if not currentScrollContent then
       currentScrollContent = CreateFrame("Frame", nil, scrollFrame)
     end
-    setSize(currentScrollContent, 298, table.getn(data) * FRAME_CONFIG.ENTRY_HEIGHT)
+    
+    setSize(currentScrollContent, 298, table.getn(data) * CONFIG.ENTRY_HEIGHT)
     scrollFrame:SetScrollChild(currentScrollContent)
     currentScrollContent:Show()
     
@@ -311,159 +556,131 @@ local function setInstanceMode(isRaid)
   updateInstanceList()
 end
 
--- More tab components (declared before updateTabVisibility)
-local moreLabelFrame = CreateFrame("Frame", nil, AutoLFMTurtleFrame)
-setSize(moreLabelFrame, 295,250)
-moreLabelFrame:SetPoint("TOPLEFT", AutoLFMTurtleFrame, "TOPLEFT", 25, -170)
-moreLabelFrame:SetBackdrop({
-  tile = true,
-  tileSize = 32,
-  edgeSize = 8,
-  insets = {left = 4, right = 4, top = 4, bottom = 4}
-})
-moreLabelFrame:Hide()
+---------------------------------------------------------------------------------
+--                    Composants More Tab                                       --
+---------------------------------------------------------------------------------
 
-local moreLabel = moreLabelFrame:CreateFontString(nil, "OVERLAY", "DialogButtonHighlightText")
-moreLabel:SetText("Broadcast Message")
-moreLabel:SetPoint("TOP", moreLabelFrame, "TOP", 0, 0)
-
--- Slider option with icon
-local sliderIcon = moreLabelFrame:CreateTexture(nil, "OVERLAY")
-sliderIcon:SetTexture("Interface\\GossipFrame\\HealerGossipIcon")
-setSize(sliderIcon, 16, 16)
-sliderIcon:SetPoint("TOPLEFT", moreLabelFrame, "TOPLEFT", 5, -50)
-
-local sliderLabel = moreLabelFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-sliderLabel:SetText("Interval:")
-sliderLabel:SetPoint("LEFT", sliderIcon, "RIGHT", 5, 0)
-
-local intervalSlider = CreateFrame("Slider", nil, moreLabelFrame)
-setSize(intervalSlider, 140, 17)
-intervalSlider:SetPoint("TOPLEFT", moreLabelFrame, "TOPLEFT", 85, -52)
-intervalSlider:SetMinMaxValues(40, 120)
-intervalSlider:SetValue(80)
-intervalSlider:SetValueStep(10)
-intervalSlider:SetOrientation("HORIZONTAL")
-intervalSlider:SetThumbTexture("Interface\\Buttons\\UI-SliderBar-Button-Horizontal")
-intervalSlider:SetBackdrop(SLIDER_CONFIG.SLIDER_BACKDROP)
-
-local sliderValue = moreLabelFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-sliderValue:SetText("60 secs")
-sliderValue:SetPoint("LEFT", intervalSlider, "RIGHT", 10, 0)
-
-intervalSlider:SetScript("OnValueChanged", function()
-  local value = intervalSlider:GetValue()
-  if value then
-    sliderValue:SetText(tostring(math.floor(value)) .. " secs")
+local function createMoreTabComponents(parent)
+  local moreLabelFrame = CreateFrame("Frame", nil, parent)
+  setSize(moreLabelFrame, CONFIG.MORE_TAB.SIZE[1], CONFIG.MORE_TAB.SIZE[2])
+  moreLabelFrame:SetPoint("TOPLEFT", parent, "TOPLEFT", CONFIG.MORE_TAB.POSITION[1], CONFIG.MORE_TAB.POSITION[2])
+  moreLabelFrame:SetBackdrop(BACKDROPS.SIMPLE_TILE)
+  moreLabelFrame:Hide()
+  
+  local moreLabel = moreLabelFrame:CreateFontString(nil, "OVERLAY", "DialogButtonHighlightText")
+  moreLabel:SetText("Broadcast Message")
+  moreLabel:SetPoint("TOP", moreLabelFrame, "TOP", 0, 0)
+  moreLabel:SetJustifyH("CENTER")
+  moreLabel:SetJustifyV("TOP")
+  moreLabel:SetWidth(moreLabelFrame:GetWidth() - 20)
+  
+  local sliderIcon = moreLabelFrame:CreateTexture(nil, "OVERLAY")
+  sliderIcon:SetTexture(MORE_ICONS.INTERVAL)
+  setSize(sliderIcon, CONFIG.ICON_SIZE[1], CONFIG.ICON_SIZE[2])
+  sliderIcon:SetPoint("TOPLEFT", moreLabelFrame, "TOPLEFT", 5, -50)
+  
+  local sliderLabel = moreLabelFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+  sliderLabel:SetText("Interval:")
+  sliderLabel:SetPoint("LEFT", sliderIcon, "RIGHT", 5, 0)
+  
+  local intervalSlider = CreateFrame("Slider", nil, moreLabelFrame)
+  setSize(intervalSlider, CONFIG.MORE_TAB.INTERVAL_SLIDER_SIZE[1], CONFIG.MORE_TAB.INTERVAL_SLIDER_SIZE[2])
+  intervalSlider:SetPoint("TOPLEFT", moreLabelFrame, "TOPLEFT", 85, -52)
+  intervalSlider:SetMinMaxValues(CONFIG.MORE_TAB.INTERVAL_MIN, CONFIG.MORE_TAB.INTERVAL_MAX)
+  intervalSlider:SetValue(CONFIG.MORE_TAB.INTERVAL_DEFAULT)
+  intervalSlider:SetValueStep(10)
+  intervalSlider:SetOrientation("HORIZONTAL")
+  intervalSlider:SetThumbTexture(TEXTURES.SLIDER_THUMB)
+  intervalSlider:SetBackdrop(BACKDROPS.SLIDER)
+  
+  local sliderValueText = moreLabelFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+  sliderValueText:SetText(CONFIG.MORE_TAB.INTERVAL_DEFAULT .. " secs")
+  sliderValueText:SetPoint("LEFT", intervalSlider, "RIGHT", 10, 0)
+  
+  intervalSlider:SetScript("OnValueChanged", function()
+    local value = intervalSlider:GetValue()
+    if value then
+      sliderValueText:SetText(tostring(math.floor(value)) .. " secs")
+    end
+  end)
+  
+  local channelIcon = moreLabelFrame:CreateTexture(nil, "OVERLAY")
+  channelIcon:SetTexture(MORE_ICONS.CHANNELS)
+  setSize(channelIcon, CONFIG.ICON_SIZE[1], CONFIG.ICON_SIZE[2])
+  channelIcon:SetPoint("TOPLEFT", moreLabelFrame, "TOPLEFT", 5, -90)
+  
+  local channelsLabel = moreLabelFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+  channelsLabel:SetText("Channels:")
+  channelsLabel:SetPoint("LEFT", channelIcon, "RIGHT", 5, 0)
+  
+  local hcCheck = CreateFrame("CheckButton", nil, moreLabelFrame, "OptionsCheckButtonTemplate")
+  setSize(hcCheck, CONFIG.CHECKBOX_SIZE[1], CONFIG.CHECKBOX_SIZE[2])
+  hcCheck:SetPoint("LEFT", channelsLabel, "RIGHT", 10, 0)
+  hcCheck:SetChecked(false)
+  
+  local hcLabel = moreLabelFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+  hcLabel:SetText("Hardcore")
+  hcLabel:SetPoint("LEFT", hcCheck, "RIGHT", 5, 0)
+  
+  local channelChecks = {Hardcore = hcCheck}
+  
+  for i, channelName in ipairs(BROADCAST_CHANNELS) do
+    local check = CreateFrame("CheckButton", nil, moreLabelFrame, "OptionsCheckButtonTemplate")
+    setSize(check, CONFIG.CHECKBOX_SIZE[1], CONFIG.CHECKBOX_SIZE[2])
+    check:SetPoint("TOPLEFT", channelsLabel, "BOTTOMLEFT", 0, -5 - (i-1)*CONFIG.MORE_TAB.CHANNEL_SPACING)
+    check:SetChecked(i == 1)
+    
+    local label = moreLabelFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    label:SetText(channelName)
+    label:SetPoint("LEFT", check, "RIGHT", 5, 0)
+    
+    channelChecks[channelName] = check
   end
-end)
-
--- Channels section with icon
-local channelIcon = moreLabelFrame:CreateTexture(nil, "OVERLAY")
-channelIcon:SetTexture("Interface\\GossipFrame\\GossipGossipIcon")
-setSize(channelIcon, 16, 16)
-channelIcon:SetPoint("TOPLEFT", moreLabelFrame, "TOPLEFT", 5, -90)
-
-local channelsLabel = moreLabelFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-channelsLabel:SetText("Channel:")
-channelsLabel:SetPoint("LEFT", channelIcon, "RIGHT", 5, 0)
-
--- Channel arrow before text (clickable)
-local channelArrow = CreateFrame("Button", nil, moreLabelFrame)
-setSize(channelArrow, 32, 32)
-channelArrow:SetPoint("LEFT", channelsLabel, "RIGHT", 10, 0)
-
-local arrowTexture = channelArrow:CreateTexture(nil, "OVERLAY")
-arrowTexture:SetTexture("Interface\\Glues\\CharacterCreate\\UI-RotationRight-Big-Up")
-arrowTexture:SetAllPoints()
-
--- Channel text after arrow
-local channelText = moreLabelFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-channelText:SetText("LookingForGroup")
-channelText:SetPoint("LEFT", channelArrow, "RIGHT", 5, 1)
-channelText:SetTextColor(1, 1, 0, 1)
-
--- Apply italic effect by using a different font
-local font, size, flags = channelText:GetFont()
-channelText:SetFont(font, size, "OUTLINE")
-
--- Invisible button on channel text
-local channelTextButton = CreateFrame("Button", nil, moreLabelFrame)
-setSize(channelTextButton, 100, 20)
-channelTextButton:SetPoint("LEFT", channelArrow, "RIGHT", 5, 0)
-
-local currentChannel = "LookingForGroup"
-local channels = {"LookingForGroup", "World", "General - Zone"}
-local channelIndex = 1
-
-local function changeChannel()
-  channelIndex = channelIndex + 1
-  if channelIndex > table.getn(channels) then
-    channelIndex = 1
-  end
-  currentChannel = channels[channelIndex]
-  channelText:SetText(currentChannel)
+  
+  local timeIcon = moreLabelFrame:CreateTexture(nil, "OVERLAY")
+  timeIcon:SetTexture(MORE_ICONS.DURATION)
+  setSize(timeIcon, CONFIG.ICON_SIZE[1], CONFIG.ICON_SIZE[2])
+  timeIcon:SetPoint("TOPLEFT", channelIcon, "BOTTOMLEFT", 0, -20)
+  
+  local timeLabel = moreLabelFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+  timeLabel:SetText("Duration: 00:00")
+  timeLabel:SetPoint("LEFT", timeIcon, "RIGHT", 5, 0)
+  
+  local sentIcon = moreLabelFrame:CreateTexture(nil, "OVERLAY")
+  sentIcon:SetTexture(MORE_ICONS.SENT)
+  setSize(sentIcon, CONFIG.ICON_SIZE[1], CONFIG.ICON_SIZE[2])
+  sentIcon:SetPoint("TOPLEFT", timeIcon, "BOTTOMLEFT", 0, -20)
+  
+  local sentLabel = moreLabelFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+  sentLabel:SetText("Sent: 0")
+  sentLabel:SetPoint("LEFT", sentIcon, "RIGHT", 5, 0)
+  
+  local nextIcon = moreLabelFrame:CreateTexture(nil, "OVERLAY")
+  nextIcon:SetTexture(MORE_ICONS.NEXT)
+  setSize(nextIcon, CONFIG.ICON_SIZE[1], CONFIG.ICON_SIZE[2])
+  nextIcon:SetPoint("TOPLEFT", sentIcon, "BOTTOMLEFT", 0, -20)
+  
+  local nextLabel = moreLabelFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+  nextLabel:SetText("Next: 60s")
+  nextLabel:SetPoint("LEFT", nextIcon, "RIGHT", 5, 0)
+  
+  uiComponents.moreTabContent = {
+    frame = moreLabelFrame,
+    label = moreLabel,
+    timeLabel = timeLabel,
+    sentLabel = sentLabel,
+    nextLabel = nextLabel,
+    intervalSlider = intervalSlider,
+    sliderValue = sliderValueText,
+    channelChecks = channelChecks
+  }
+  
+  return uiComponents.moreTabContent
 end
 
-channelArrow:SetScript("OnClick", changeChannel)
-channelTextButton:SetScript("OnClick", changeChannel)
-
--- Time line
-local timeIcon = moreLabelFrame:CreateTexture(nil, "OVERLAY")
-timeIcon:SetTexture("Interface\\GossipFrame\\VendorGossipIcon")
-setSize(timeIcon, 16, 16)
-timeIcon:SetPoint("TOPLEFT", channelIcon, "BOTTOMLEFT", 0, -20)
-
-local timeLabel = moreLabelFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-timeLabel:SetText("Duration: 00:00")
-timeLabel:SetPoint("LEFT", timeIcon, "RIGHT", 5, 0)
-
--- Sent line
-local sentIcon = moreLabelFrame:CreateTexture(nil, "OVERLAY")
-sentIcon:SetTexture("Interface\\GossipFrame\\TrainerGossipIcon")
-setSize(sentIcon, 16, 16)
-sentIcon:SetPoint("TOPLEFT", timeIcon, "BOTTOMLEFT", 0, -20)
-
-local sentLabel = moreLabelFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-sentLabel:SetText("Sent: 0")
-sentLabel:SetPoint("LEFT", sentIcon, "RIGHT", 5, 0)
-
--- Next line
-local nextIcon = moreLabelFrame:CreateTexture(nil, "OVERLAY")
-nextIcon:SetTexture("Interface\\GossipFrame\\TaxiGossipIcon")
-setSize(nextIcon, 16, 16)
-nextIcon:SetPoint("TOPLEFT", sentIcon, "BOTTOMLEFT", 0, -20)
-
-local nextLabel = moreLabelFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-nextLabel:SetText("Next: 60s")
-nextLabel:SetPoint("LEFT", nextIcon, "RIGHT", 5, 0)
-
--- HC button positioned under slider value
-local hcLabel = moreLabelFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-hcLabel:SetText("[HC]")
-hcLabel:SetPoint("TOPLEFT", sliderValue, "BOTTOMLEFT", 0, -27 )
-hcLabel:SetTextColor(0.75, 0.75, 0.75, 1)
-
-local hcButton = CreateFrame("CheckButton", nil, moreLabelFrame, "OptionsCheckButtonTemplate")
-setSize(hcButton, 20, 20)
-hcButton:SetPoint("LEFT", hcLabel, "RIGHT", 5, 0)
-hcButton:SetChecked(false)
-hcButton:SetTextColor(0.75, 0.75, 0.75, 1)
-
--- Apply silver color to checkbox
-local checkTexture = hcButton:GetNormalTexture()
-if checkTexture then
-  checkTexture:SetVertexColor(0.75, 0.75, 0.75, 1)
-end
-
-hcButton:SetScript("OnClick", function()
-  -- HC toggle logic here
-end)
-
-
--- Tab system
-local CurrentTab = 1
-local tabs = {}
+---------------------------------------------------------------------------------
+--                           Système de Tabs                                   --
+---------------------------------------------------------------------------------
 
 local function CreateTab(name, id, text, parent)
   local tab = CreateFrame("Button", name, parent)
@@ -475,7 +692,6 @@ local function CreateTab(name, id, text, parent)
   tab.text = tabText
   tab.isActive = false
   
-  -- Create texture once
   local texture = tab:CreateTexture(nil, "BACKGROUND")
   texture:SetAllPoints()
   tab:SetNormalTexture(texture)
@@ -504,7 +720,6 @@ end
 local function updateTabVisibility(tabId)
   local isMoreTab = (tabId == 3)
   
-  -- Hide/show instance scroll frame
   local scrollFrame = getglobal("AutoLFMTurtleFrameInstancesList")
   if scrollFrame then
     if isMoreTab then
@@ -517,24 +732,24 @@ local function updateTabVisibility(tabId)
     end
   end
   
-  -- Hide/show raid size controls
-  if raidSizeControls and raidSizeControls.background then
+  if uiComponents.raidSizeControls and uiComponents.raidSizeControls.background then
     if isMoreTab then
-      raidSizeControls.background:Hide()
+      uiComponents.raidSizeControls.background:Hide()
     else
-      if tabId == 2 then -- Raids tab
-        raidSizeControls.background:Show()
+      if tabId == 2 then
+        uiComponents.raidSizeControls.background:Show()
       else
-        raidSizeControls.background:Hide()
+        uiComponents.raidSizeControls.background:Hide()
       end
     end
   end
   
-  -- Hide/show More tab content
-  if isMoreTab then
-    moreLabelFrame:Show()
-  else
-    moreLabelFrame:Hide()
+  if uiComponents.moreTabContent and uiComponents.moreTabContent.frame then
+    if isMoreTab then
+      uiComponents.moreTabContent.frame:Show()
+    else
+      uiComponents.moreTabContent.frame:Hide()
+    end
   end
 end
 
@@ -542,7 +757,7 @@ local function SetTab(frame, id)
   CurrentTab = id
   for i, tab in ipairs(tabs) do
     tab:ClearAllPoints()
-    tab:SetPoint("BOTTOMLEFT", AutoLFMTurtleFrame, "BOTTOMLEFT", FRAME_CONFIG.TAB_POSITIONS[i][1], FRAME_CONFIG.TAB_POSITIONS[i][2])
+    tab:SetPoint("BOTTOMLEFT", uiComponents.mainFrame, "BOTTOMLEFT", CONFIG.TAB_POSITIONS[i][1], CONFIG.TAB_POSITIONS[i][2])
     if i == id then
       setTabActive(tab)
     else
@@ -551,27 +766,15 @@ local function SetTab(frame, id)
   end
   
   updateTabVisibility(id)
-  
-  if AutoLFM_API and AutoLFM_API.IsAvailable() then
-    local groupType = "other"
-    if id == 1 then groupType = "dungeon" end
-    if id == 2 then groupType = "raid" end
-    -- Tab change handled by API
-  end
 end
 
-tabs[1] = CreateTab("AutoLFMTurtleFrameTab1", 1, "Dungeons", AutoLFMTurtleFrame)
-tabs[2] = CreateTab("AutoLFMTurtleFrameTab2", 2, "Raids", AutoLFMTurtleFrame)
-tabs[3] = CreateTab("AutoLFMTurtleFrameTab3", 3, "More", AutoLFMTurtleFrame)
+---------------------------------------------------------------------------------
+--                           Boutons de Rôles                                  --
+---------------------------------------------------------------------------------
 
-tabs[1]:SetScript("OnClick", function() SetTab(AutoLFMTurtleFrame, 1); setInstanceMode(false) end)
-tabs[2]:SetScript("OnClick", function() SetTab(AutoLFMTurtleFrame, 2); setInstanceMode(true) end)
-tabs[3]:SetScript("OnClick", function() SetTab(AutoLFMTurtleFrame, 3) end)
-
--- Role buttons
 local function createRoleButton(data, index, parent)
   local btn = CreateFrame("Button", "AutoLFMTurtleFrameRole"..data.name, parent)
-  setSize(btn, FRAME_CONFIG.ROLE_SIZE[1], FRAME_CONFIG.ROLE_SIZE[2])
+  setSize(btn, CONFIG.ROLE_SIZE[1], CONFIG.ROLE_SIZE[2])
   btn:SetPoint("TOPLEFT", 74 + (index-1)*98, -52)
   
   local bg = btn:CreateTexture(nil, "BACKGROUND") 
@@ -585,66 +788,75 @@ local function createRoleButton(data, index, parent)
   icon:SetAllPoints()
   icon:SetTexture(data.texture)
   
-  -- Create completely independent checkbox frame
   local checkFrame = CreateFrame("Frame", nil, parent)
-  setSize(checkFrame, 18, 18)
+  setSize(checkFrame, CONFIG.CHECKBOX_SIZE_LARGE[1], CONFIG.CHECKBOX_SIZE_LARGE[2])
   checkFrame:SetPoint("BOTTOMLEFT", btn, "BOTTOMLEFT", 3, -3)
   
   local check = CreateFrame("CheckButton", nil, checkFrame, "OptionsCheckButtonTemplate")
-  setSize(check, 18, 18)
+  setSize(check, CONFIG.CHECKBOX_SIZE_LARGE[1], CONFIG.CHECKBOX_SIZE_LARGE[2])
   check:SetPoint("CENTER", checkFrame, "CENTER", 0, 0)
-  check:SetHitRectInsets(0, 0, 0, 0) -- Limit hit area exactly to checkbox size
+  check:SetHitRectInsets(0, 0, 0, 0)
   
-  check.roleName = string.lower(data.name)
-  check:SetScript("OnClick", function()
-    -- Role selection handled by API
+  btn:SetScript("OnClick", function()
+    check:SetChecked(not check:GetChecked())
   end)
-
-  btn:SetScript("OnClick", function() 
-    check:Click() 
-  end)
-
+  
   return btn, check
 end
 
-local roleButtons = {}
-local roleChecks = {}
+---------------------------------------------------------------------------------
+--                           Bouton de Recherche                               --
+---------------------------------------------------------------------------------
+
+local function createSearchButton(parent)
+  local searchBtn = CreateFrame("Button", "AutoLFMTurtleFrameSearchButton", parent, "UIPanelButtonTemplate")
+  setSize(searchBtn, CONFIG.BUTTON_SIZE[1], CONFIG.BUTTON_SIZE[2])
+  searchBtn:SetPoint("BOTTOM", parent, "BOTTOM", -10, 79)
+  searchBtn:SetText("Search")
+  
+  searchBtn:SetScript("OnClick", function()
+    -- Interface pure - pas de logique de recherche
+  end)
+  
+  return searchBtn
+end
+
+---------------------------------------------------------------------------------
+--                           Initialisation                                    --
+---------------------------------------------------------------------------------
+
+local AutoLFMTurtleFrame = createMainFrame()
+createFrameElements(AutoLFMTurtleFrame)
+
+local editBox = createEditBox(AutoLFMTurtleFrame)
+local raidSizeControls = createRaidSizeControls(AutoLFMTurtleFrame)
+local instanceScrollFrame = createScrollFrame(AutoLFMTurtleFrame)
+local moreTabContent = createMoreTabComponents(AutoLFMTurtleFrame)
+
 for i, roleData in ipairs(ROLE_DATA) do
   local btn, check = createRoleButton(roleData, i, AutoLFMTurtleFrame)
   roleButtons[roleData.name] = btn
   roleChecks[roleData.name] = check
 end
 
-local instanceScrollFrame = createScrollFrame(AutoLFMTurtleFrame)
+tabs[1] = CreateTab("AutoLFMTurtleFrameTab1", 1, "Dungeons", AutoLFMTurtleFrame)
+tabs[2] = CreateTab("AutoLFMTurtleFrameTab2", 2, "Raids", AutoLFMTurtleFrame)
+tabs[3] = CreateTab("AutoLFMTurtleFrameTab3", 3, "More", AutoLFMTurtleFrame)
+
+tabs[1]:SetScript("OnClick", function() SetTab(AutoLFMTurtleFrame, 1); setInstanceMode(false) end)
+tabs[2]:SetScript("OnClick", function() SetTab(AutoLFMTurtleFrame, 2); setInstanceMode(true) end)
+tabs[3]:SetScript("OnClick", function() SetTab(AutoLFMTurtleFrame, 3) end)
+
+local searchButton = createSearchButton(AutoLFMTurtleFrame)
+
+SetTab(AutoLFMTurtleFrame, 1)
 updateScrollFrameSize(instanceScrollFrame)
+updateInstanceList()
 
-local function createMoreTabComponents(parent)
-  return {
-    label = moreLabel,
-  }
+AutoLFMTurtleFrame:Show()
+
+if not validateInstanceData() then
+  DEFAULT_CHAT_FRAME:AddMessage("AutoLFM: Please ensure Variables.lua is properly loaded with instance data.")
+else
+  DEFAULT_CHAT_FRAME:AddMessage("AutoLFM Turtle UI (Interface Pure) loaded successfully!")
 end
-
-local moreTabContent = createMoreTabComponents(AutoLFMTurtleFrame)
-
--- Search button
-local function createSearchButton(parent)
-  local searchBtn = CreateFrame("Button", "AutoLFMTurtleFrameSearchButton", parent, "UIPanelButtonTemplate")
-  setSize(searchBtn, FRAME_CONFIG.BUTTON_SIZE[1], FRAME_CONFIG.BUTTON_SIZE[2])
-  searchBtn:SetPoint("BOTTOM", parent, "BOTTOM", -10, 79)
-  searchBtn:SetText("Search")
-  searchBtn:SetScript("OnClick", function()
-    if AutoLFM_API and AutoLFM_API.IsAvailable() then
-      -- Start broadcast via API
-    end
-  end)
-  return searchBtn
-end
-
--- Initialize addon
-local function initializeAddon()
-  local searchButton = createSearchButton(AutoLFMTurtleFrame)
-  SetTab(AutoLFMTurtleFrame, 1)
-  updateInstanceList()
-end
-
-local AutoLFMAddon = initializeAddon()
