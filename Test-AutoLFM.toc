@@ -1,0 +1,26 @@
+## Interface: 11200
+## Title: Test-AutoLFM
+## Notes: Automated LFM Message
+## Version: 
+## Author: Gondoleon
+## DefaultState: Enabled
+## SavedVariables: AutoLFM_SavedVariables
+
+## GitHub: https://github.com/FSuhas/AutoLFM
+
+
+LFMData\Variables.lua
+
+LFMData\Function.lua
+LFMData\MinimapButon.lua
+LFMData\MsgDynamique.lua
+LFMData\Broadcast.lua
+LFMData\API.lua
+
+LFMUI\Classic.lua
+
+AutoLFM.lua
+
+LFMData\DisplayDonjon.lua
+LFMData\DisplayRaid.lua
+LFMData\Roles.lua
