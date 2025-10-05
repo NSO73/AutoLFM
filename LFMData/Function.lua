@@ -65,18 +65,18 @@ function tableCount(t)
     return count
 end
 
-function OnUpdateHandler(self, elapsed)
-    now = GetTime()
-    if now >= nextChange then
-        eyeOpen = not eyeOpen
-        eye:SetTexture(eyeOpen and openTexture or closedTexture)
-        if eyeOpen then
-            nextChange = now + math.random(1, 3)
-        else
-            nextChange = now + 0.15
-        end
-    end
-end
+--function OnUpdateHandler(self, elapsed)
+--    now = GetTime()
+--    if now >= nextChange then
+--        eyeOpen = not eyeOpen
+--        eye:SetTexture(eyeOpen and openTexture or closedTexture)
+--        if eyeOpen then
+--            nextChange = now + math.random(1, 3)
+--        else
+--            nextChange = now + 0.15
+--        end
+--    end
+--end
 
 for _, donjon in pairs(donjons) do
   if donjonCount >= maxDonjons then
@@ -283,4 +283,46 @@ function clearSelectedRoles()
       end
     end
     -- Mettre à jour l'affichage après avoir désélectionné tous les rôles
+end
+
+---------------------------------------------------------------------------------
+--                           Gestion des Thèmes                               --
+---------------------------------------------------------------------------------
+
+function GetCurrentTheme()
+    return selectedTheme or "Classic"
+end
+
+function LoadTheme(themeName)
+    if not themeName or themeName == "" then
+        if AutoLFM_SavedVariables and AutoLFM_SavedVariables[uniqueIdentifier] then
+            themeName = AutoLFM_SavedVariables[uniqueIdentifier].selectedTheme
+        end
+        if not themeName or themeName == "" then
+            themeName = "Classic"
+        end
+    end
+    
+    themeName = string.upper(string.sub(themeName, 1, 1)) .. string.lower(string.sub(themeName, 2))
+    
+    local themeExists = false
+    for _, theme in ipairs(availableThemes) do
+        if theme == themeName then
+            themeExists = true
+            break
+        end
+    end
+    
+    if not themeExists then
+        DEFAULT_CHAT_FRAME:AddMessage("Theme '" .. themeName .. "' not found. Loading Classic theme.")
+        themeName = "Classic"
+    end
+    
+    if AutoLFM_SavedVariables and AutoLFM_SavedVariables[uniqueIdentifier] then
+        AutoLFM_SavedVariables[uniqueIdentifier].selectedTheme = themeName
+    end
+    selectedTheme = themeName
+    
+    local themeFile = "Interface\\AddOns\\AutoLFM\\LFMUI\\" .. themeName .. ".lua"
+    
 end

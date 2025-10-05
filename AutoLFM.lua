@@ -5,19 +5,8 @@
 local msglog = CreateFrame("Frame")
 msglog:RegisterEvent("PLAYER_ENTERING_WORLD")
 
-function ShowDungeonUI()
-    raidFrame:Hide()
-    raidScrollFrame:Hide()
-    editBox:Hide()
-    sliderframe:Hide()
-    toggleButton:Hide()
-    msgFrameDj:Hide()
-    msgFrameRaids:Hide()
-    dashText:Hide()
-    if AutoLFM:IsVisible() then
-        AutoLFM:Hide()
-    end
-end
+
+
 
 local function OnPlayerEnteringWorld(self, event)
 --   local seg1 = "|cffffffff ---- Refonte de l'addon ---- "
@@ -38,9 +27,11 @@ local function OnPlayerEnteringWorld(self, event)
   DEFAULT_CHAT_FRAME:AddMessage(seg2 .. seg3 .. seg4 .. seg5 .. seg6 .. seg7 .. seg8 .. seg9)
   DEFAULT_CHAT_FRAME:AddMessage(seg10 .. seg11)
   
+  LoadTheme(AutoLFM_SavedVariables[uniqueIdentifier].selectedTheme)
+  
   InitMinimapButton()
   DisplayDungeonsByColor()
-  ShowDungeonUI()
+  AutoLFM:Hide()
   msglog:UnregisterEvent("PLAYER_ENTERING_WORLD")
 end
 
@@ -115,7 +106,6 @@ end
 -- Définir les slash commandes
 SLASH_LFM1 = "/lfm"
 SLASH_LFM3 = "/lfm help"
-SLASH_LFM2 = "/lfm broadcast"
 SLASH_LFM5 = "/lfm minimap show"
 SLASH_LFM6 = "/lfm minimap hide"
 SLASH_LFM = "/lfm minimap reset"
@@ -132,10 +122,12 @@ SlashCmdList["LFM"] = function(msg)
         DEFAULT_CHAT_FRAME:AddMessage("|cffffff00Available commands :")
         DEFAULT_CHAT_FRAME:AddMessage("|cff00FFFF /lfm  |cffFFFFFFOpens AutoLFM window.")
         DEFAULT_CHAT_FRAME:AddMessage("|cff00FFFF /lfm help   |cffFFFFFFDisplays all available orders.")  -- Bleu clair pour la commande et blanc pour l'explication
-        DEFAULT_CHAT_FRAME:AddMessage("|cff00FFFF /lfm broadcast   |cffFFFFFFOpen Broadcast settings.")  -- Bleu clair pour la commande et blanc pour l'explication
         DEFAULT_CHAT_FRAME:AddMessage("|cff00FFFF /lfm minimap show   |cffFFFFFFDisplays the minimap button.")
         DEFAULT_CHAT_FRAME:AddMessage("|cff00FFFF /lfm minimap hide   |cffFFFFFFHide minimap button.")
         DEFAULT_CHAT_FRAME:AddMessage("|cff00FFFF /lfm minimap reset   |cffFFFFFFReset minimap button position.")
+        DEFAULT_CHAT_FRAME:AddMessage("|cff00FFFF /lfm theme <name>   |cffFFFFFFChange theme (Classic, Modern).")
+        DEFAULT_CHAT_FRAME:AddMessage("|cff00FFFF /lfm theme list   |cffFFFFFFList available themes.")
+        DEFAULT_CHAT_FRAME:AddMessage("|cff00FFFF /lfm theme current   |cffFFFFFFShow current theme.")
         return
     end
 
@@ -143,9 +135,9 @@ SlashCmdList["LFM"] = function(msg)
     if args[1] == "" or args[1] == "open" then
         if AutoLFM then
             if AutoLFM:IsVisible() then
-                AutoLFM:Hide()  -- Si la fenêtre est visible, la cacher
+                HideUIPanel(AutoLFM)  -- Si la fenêtre est visible, la cacher
             else
-                AutoLFM:Show()  -- Si la fenêtre est cachée, l'afficher
+                ShowUIPanel(AutoLFM)  -- Si la fenêtre est cachée, l'afficher
             end
         end
         return
@@ -175,32 +167,11 @@ SlashCmdList["LFM"] = function(msg)
         return
     end
 
-    if args[1] == "broadcast" then
-        if channelsFrame:IsVisible() then
-            channelsFrame:Hide()  -- Cacher le cadre des canaux
-            DEFAULT_CHAT_FRAME:AddMessage("Channels frame hidden.")  -- Message de confirmation
-        else
-            CreateChannelButtons()
-            LoadSelectedChannels()
-            channelsFrame:Show()  -- Afficher le cadre des canaux
-            DEFAULT_CHAT_FRAME:AddMessage("Channels frame displayed.")  -- Message de confirmation
-        end
-        return
-    end
-
     if args[1] == "petfoireux" then
         ShowBigMessage("Fuuumiiieeeerrrr !!!!!!", 3)
         PlaySoundFile("Interface\\AddOns\\AutoLFM\\sound\\fumier.ogg")
         return
     end
-
-    -- if args[1] == "ui" and args[2] == "classic" then
-    --     LoadUILayout("Classic")
-    --     return
-    -- elseif args[1] == "ui" and args[2] == "modern" then
-    --     LoadUILayout("Modern")
-    --     return
-    -- end
 
     -- Ajout dans la fonction SlashCmdList["LFM"]
     if args[1] == "minimap" and args[2] == "reset" then
