@@ -1,0 +1,60 @@
+## Interface: 11200
+## Title: Auto|cff0070ddL|r|cffffffffF|cffff0000M|r 3.0
+## Notes: Automated LFM Broadcaster
+## Author: Gondoleon, NSO73
+## SavedVariables: V3_Settings, V3_Presets
+## OptionalDeps: pfQuest, ShaguTweaks
+## Version: 3.0
+
+Core\Commands.lua
+Core\Constants.lua
+Core\Maestro.lua
+Core\Persistent.lua
+Core\Utils.lua
+Core\Broadcaster.lua
+
+Logic\Widgets\Channels.lua
+Logic\Widgets\EditBox.lua
+Logic\Widgets\RowList.lua
+Logic\Widgets\Stats.lua
+Logic\Widgets\Tabs.lua
+UI\Widgets\Channels.lua
+UI\Widgets\EditBox.lua
+UI\Widgets\RowList.lua
+UI\Widgets\Slider.lua
+UI\Widgets\Stats.lua
+UI\Widgets\Tabs.lua
+
+Logic\Group.lua
+Logic\MainFrame.lua
+Logic\Message.lua
+Logic\Roles.lua
+Logic\Selection.lua
+
+Logic\Content\AutoInvite.lua
+Logic\Content\Broadcasts.lua
+Logic\Content\Dungeons.lua
+Logic\Content\Options.lua
+Logic\Content\Presets.lua
+Logic\Content\Quests.lua
+Logic\Content\Raids.lua
+
+UI\Content\AutoInvite.lua
+UI\Content\Broadcasts.lua
+UI\Content\Dungeons.lua
+UI\Content\Options.lua
+UI\Content\Presets.lua
+UI\Content\Quests.lua
+UI\Content\Raids.lua
+
+Components\DarkUI.lua
+Components\MinimapButton.lua
+Components\WelcomePopup.lua
+
+Debug\EventMonitor.lua
+Debug\GroupTest.lua
+Debug\DebugWindow.lua
+
+UI\MainFrame.xml
+
+Core\Init.lua

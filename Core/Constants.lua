@@ -1,153 +1,110 @@
 --=============================================================================
 -- AutoLFM: Constants
+--   Shared constants used across multiple files
 --=============================================================================
-
-if not AutoLFM then AutoLFM = {} end
-if not AutoLFM.Core then AutoLFM.Core = {} end
-if not AutoLFM.Core.Constants then AutoLFM.Core.Constants = {} end
+AutoLFM = AutoLFM or {}
+AutoLFM.Core = AutoLFM.Core or {}
+AutoLFM.Core.Constants = AutoLFM.Core.Constants or {}
 
 -----------------------------------------------------------------------------
--- General Constants
+-- Tab Mappings
+-----------------------------------------------------------------------------
+AutoLFM.Core.Constants.BOTTOM_TAB_MAP = {
+  dungeons = 1,
+  raids = 2,
+  quests = 3,
+  broadcasts = 4,
+  [1] = "dungeons",
+  [2] = "raids",
+  [3] = "quests",
+  [4] = "broadcasts"
+}
+
+AutoLFM.Core.Constants.LINE_TAB_MAP = {
+  presets = 1,
+  autoinvite = 5,
+  options = 4,
+  [1] = "presets",
+  [5] = "autoinvite",
+  [4] = "options"
+}
+
+-----------------------------------------------------------------------------
+-- Selection Constraints
+-----------------------------------------------------------------------------
+AutoLFM.Core.Constants.MAX_DUNGEONS = 4
+AutoLFM.Core.Constants.MAX_RAIDS = 1
+AutoLFM.Core.Constants.MAX_CHECKBOX_SEARCH_ITERATIONS = 50
+
+-----------------------------------------------------------------------------
+-- Group Sizes
 -----------------------------------------------------------------------------
 AutoLFM.Core.Constants.GROUP_SIZE_DUNGEON = 5
-AutoLFM.Core.Constants.GROUP_SIZE_RAID = 10
-AutoLFM.Core.Constants.MAX_DUNGEONS = 4
-AutoLFM.Core.Constants.MAX_MESSAGE_LENGTH = 150
-AutoLFM.Core.Constants.UPDATE_THROTTLE = 0.1
+AutoLFM.Core.Constants.GROUP_SIZE_RAID = 40
 
 -----------------------------------------------------------------------------
--- Interval Settings
+-- Broadcast Intervals
 -----------------------------------------------------------------------------
 AutoLFM.Core.Constants.INTERVAL_MIN = 30
 AutoLFM.Core.Constants.INTERVAL_MAX = 120
 AutoLFM.Core.Constants.INTERVAL_STEP = 10
 AutoLFM.Core.Constants.INTERVAL_DEFAULT = 60
+AutoLFM.Core.Constants.UPDATE_THROTTLE = 0.1
 
 -----------------------------------------------------------------------------
 -- UI Dimensions
 -----------------------------------------------------------------------------
 AutoLFM.Core.Constants.ROW_HEIGHT = 20
 AutoLFM.Core.Constants.CHECKBOX_SIZE = 20
-AutoLFM.Core.Constants.ICON_SIZE = 16
-AutoLFM.Core.Constants.EDITBOX_HEIGHT = 28
-AutoLFM.Core.Constants.EDITBOX_WIDTH = 285
-AutoLFM.Core.Constants.BUTTON_HEIGHT = 20
-AutoLFM.Core.Constants.BUTTON_WIDTH_SMALL = 60
-AutoLFM.Core.Constants.BUTTON_WIDTH_MEDIUM = 80
-AutoLFM.Core.Constants.BUTTON_WIDTH_LARGE = 110
-AutoLFM.Core.Constants.SPACING_SMALL = 5
-AutoLFM.Core.Constants.SPACING_MEDIUM = 10
-AutoLFM.Core.Constants.SPACING_LARGE = 20
-
------------------------------------------------------------------------------
--- Content Types
------------------------------------------------------------------------------
-AutoLFM.Core.Constants.TYPE_DUNGEON = "dungeon"
-AutoLFM.Core.Constants.TYPE_RAID = "raid"
+AutoLFM.Core.Constants.CONTENT_DEFAULT_HEIGHT = 230
+AutoLFM.Core.Constants.MESSAGE_PREVIEW_WIDTH = 330
+AutoLFM.Core.Constants.MESSAGE_PREVIEW_HEIGHT = 30
+AutoLFM.Core.Constants.MESSAGE_PREVIEW_TEXT_WIDTH = 290
+AutoLFM.Core.Constants.MESSAGE_PREVIEW_ICON_SIZE = 20
 
 -----------------------------------------------------------------------------
 -- Paths
 -----------------------------------------------------------------------------
-AutoLFM.Core.Constants.TEXTURE_PATH = "Interface\\AddOns\\AutoLFM\\UI\\Textures\\"
-AutoLFM.Core.Constants.SOUND_PATH = "Interface\\AddOns\\AutoLFM\\UI\\Sounds\\"
-
------------------------------------------------------------------------------
--- Chat
------------------------------------------------------------------------------
-AutoLFM.Core.Constants.CHAT_PREFIX = "|cff808080[|r|cffffffffAuto|r|cff0070ddL|r|cffffffffF|r|cffff0000M|r|cff808080]|r "
-
------------------------------------------------------------------------------
--- Textures
------------------------------------------------------------------------------
-AutoLFM.Core.Constants.TEXTURES = {
-  TOOLTIP_BACKGROUND = "tooltipBackground",
-  TOOLTIP_BORDER = "tooltipBorder",
-  SLIDER_BUTTON = "sliderButtonHorizontal",
-  SLIDER_BACKGROUND = "sliderBackground",
-  SLIDER_BORDER = "sliderBorder",
-  WHITE = "white",
-  BUTTON_ROTATION_LEFT = "Icons\\buttonRotationLeft",
-  BUTTON_HIGHLIGHT = "Icons\\buttonHighlight"
-}
+AutoLFM.Core.Constants.TEXTURE_PATH = "Interface\\AddOns\\AutoLFM3\\UI\\Textures\\"
+AutoLFM.Core.Constants.SOUND_PATH = "Interface\\AddOns\\AutoLFM3\\UI\\Sounds\\"
 
 -----------------------------------------------------------------------------
 -- Sounds
 -----------------------------------------------------------------------------
 AutoLFM.Core.Constants.SOUNDS = {
-  START = "LFG_RoleCheck.ogg",
-  STOP = "LFG_Denied.ogg"
+  START = "Start.ogg",
+  STOP = "Stop.ogg",
+  FULL = "Full.ogg"
 }
 
 -----------------------------------------------------------------------------
--- Color Presets (RGB)
+-- Chat Output
 -----------------------------------------------------------------------------
-AutoLFM.Core.Constants.COLOR_PRESETS = {
-  yellow = {r = 1, g = 1, b = 0},
-  gold = {r = 1, g = 0.82, b = 0},
-  white = {r = 1, g = 1, b = 1},
-  green = {r = 0.25, g = 0.75, b = 0.25},
-  red = {r = 1, g = 0, b = 0},
-  orange = {r = 1, g = 0.5, b = 0.25},
-  gray = {r = 0.5, g = 0.5, b = 0.5},
-  blue = {r = 0.3, g = 0.6, b = 1},
-  disabled = {r = 0.5, g = 0.5, b = 0.5}
+AutoLFM.Core.Constants.CHAT_PREFIX = "|cff808080[|r|cffffffffAuto|r|cff0070ddL|r|cffffffffF|r|cffff0000M|r|cff808080]|r "
+
+-----------------------------------------------------------------------------
+-- Color Definitions
+-----------------------------------------------------------------------------
+AutoLFM.Core.Constants.COLORS = {
+  GOLD = {id = 1, name = "GOLD", priority = 99, r = 1.0, g = 0.82, b = 0.0, hex = "FFD100"},
+  WHITE = {id = 2, name = "WHITE", priority = 99, r = 1.0, g = 1.0, b = 1.0, hex = "FFFFFF"},
+  GRAY = {id = 3, name = "GRAY", priority = 5, r = 0.5, g = 0.5, b = 0.5, hex = "808080"},
+  GREEN = {id = 4, name = "GREEN", priority = 1, r = 0.25, g = 0.75, b = 0.25, hex = "40BF40"},
+  YELLOW = {id = 5, name = "YELLOW", priority = 2, r = 1.0, g = 1.0, b = 0.0, hex = "FFFF00"},
+  ORANGE = {id = 6, name = "ORANGE", priority = 3, r = 1.0, g = 0.5, b = 0.25, hex = "FF8040"},
+  RED = {id = 7, name = "RED", priority = 4, r = 1.0, g = 0.0, b = 0.0, hex = "FF0000"},
+  BLUE = {id = 8, name = "BLUE", priority = 99, r = 0.0, g = 0.5, b = 1.0, hex = "0080FF"}
 }
 
 -----------------------------------------------------------------------------
--- Chat Colors (Hex)
+-- Level-based Priority Thresholds
 -----------------------------------------------------------------------------
-AutoLFM.Core.Constants.CHAT_COLORS = {
-  yellow = "ffff00",
-  gold = "ffd100",
-  white = "ffffff",
-  green = "40bf40",
-  red = "ff0000",
-  orange = "ff8040",
-  gray = "808080",
-  blue = "0070dd"
-}
-
------------------------------------------------------------------------------
--- Priority Colors
------------------------------------------------------------------------------
-AutoLFM.Core.Constants.PRIORITY_COLORS = {
-  {priority = 5, key = "gray", r = 0.5, g = 0.5, b = 0.5},
-  {priority = 1, key = "green", r = 0.25, g = 0.75, b = 0.25},
-  {priority = 2, key = "yellow", r = 1.0, g = 1.0, b = 0.0},
-  {priority = 3, key = "orange", r = 1.0, g = 0.50, b = 0.25},
-  {priority = 4, key = "red", r = 1.0, g = 0.0, b = 0.0}
-}
-
------------------------------------------------------------------------------
--- Default Settings
------------------------------------------------------------------------------
-AutoLFM.Core.Constants.DEFAULTS = {
-  MINIMAP_ANGLE = 235,
-  MINIMAP_HIDDEN = false,
-  DARK_MODE = nil,
-  BROADCAST_INTERVAL = 60,
-  MISC_MODULES = {
-    fpsDisplay = false,
-    restedXP = false,
-    autoInvite = false,
-    guildSpam = false,
-    autoMarker = false
-  }
-}
-
------------------------------------------------------------------------------
--- Link Patterns
------------------------------------------------------------------------------
-AutoLFM.Core.Constants.LINK_PATTERNS = {
-  QUEST = "|c.-|Hquest:.-|h%[.-%]|h|r",
-  ITEM = "|c.-|Hitem:.-|h%[.-%]|h|r"
-}
-
------------------------------------------------------------------------------
--- Link Formats
------------------------------------------------------------------------------
-AutoLFM.Core.Constants.LINK_FORMATS = {
-  QUEST = "|c%s|Hquest:%d:%d|h[%s]|h|r"
+AutoLFM.Core.Constants.GREEN_THRESHOLDS = {
+  [1] = 4,  -- Level 1-9
+  [2] = 5,  -- Level 10-19
+  [3] = 6,  -- Level 20-29
+  [4] = 7,  -- Level 30-39
+  [5] = 8   -- Level 40+
 }
 
 -----------------------------------------------------------------------------
@@ -212,4 +169,53 @@ AutoLFM.Core.Constants.RAIDS = {
   {name = "Emerald Sanctum", tag = "ES", sizeMin = 30, sizeMax = 40},
   {name = "Temple of Ahn'Qiraj", tag = "AQ40", sizeMin = 20, sizeMax = 40},
   {name = "Naxxramas", tag = "Naxx", sizeMin = 30, sizeMax = 40}
+}
+
+-----------------------------------------------------------------------------
+-- Link Formats
+-----------------------------------------------------------------------------
+AutoLFM.Core.Constants.LINK_FORMATS = {
+  QUEST = "|c%s|Hquest:%d:%d|h[%s]|h|r"
+}
+
+-----------------------------------------------------------------------------
+-- Message Template Variables
+-----------------------------------------------------------------------------
+AutoLFM.Core.Constants.MESSAGE_VARIABLES = {
+  ["_CONS_"] = "Dungeon/Raid names",
+  ["_MISS_"] = "Number of missing players",
+  ["_CUR_"] = "Current group size",
+  ["_TAR_"] = "Target group size",
+  ["_ROL_"] = "Required roles"
+}
+
+-----------------------------------------------------------------------------
+-- Default Message Templates
+-----------------------------------------------------------------------------
+AutoLFM.Core.Constants.DEFAULT_MESSAGE_TEMPLATES = {
+  dungeon = "LF_MISS_M for _CONS_ _ROL_",
+  raid = "_CONS_ LF_MISS_M _ROL_ _CUR_/_TAR_"
+}
+
+-----------------------------------------------------------------------------
+-- Default Settings
+-----------------------------------------------------------------------------
+AutoLFM.Core.Constants.DEFAULTS = {
+  BROADCAST_INTERVAL = 60,
+  DARK_MODE = nil,
+  DEFAULT_PANEL = "dungeons",
+  DUNGEON_FILTERS = {
+    GRAY = true,
+    GREEN = true,
+    YELLOW = true,
+    ORANGE = true,
+    RED = true
+  },
+  MESSAGE_TEMPLATE_DUNGEON = "LF_MISS_M for _CONS_ _ROL_",
+  MESSAGE_TEMPLATE_RAID = "_CONS_ LF_MISS_M _ROL_ _CUR_/_TAR_",
+  MINIMAP_HIDDEN = false,
+  MINIMAP_POS = nil,
+  PRESETS_CONDENSED = false,
+  SELECTED_CHANNELS = {},
+  WELCOME_SHOWN = false
 }
