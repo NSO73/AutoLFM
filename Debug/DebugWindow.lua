@@ -6,17 +6,19 @@ AutoLFM = AutoLFM or {}
 AutoLFM.Debug = AutoLFM.Debug or {}
 AutoLFM.Debug.DebugWindow = AutoLFM.Debug.DebugWindow or {}
 
------------------------------------------------------------------------------
+local M = AutoLFM.Debug.DebugWindow
+
+--=============================================================================
 -- Private State
------------------------------------------------------------------------------
+--=============================================================================
 local debugFrame = nil
 local logBuffer = {}
 local maxLogLines = 500
 local isEnabled = false
 
------------------------------------------------------------------------------
+--=============================================================================
 -- Color Codes
------------------------------------------------------------------------------
+--=============================================================================
 local COLORS = {
   EVENT = "|cff00ff00",      -- Green
   COMMAND = "|cff00aaff",    -- Blue
@@ -28,9 +30,9 @@ local COLORS = {
   RESET = "|r"
 }
 
------------------------------------------------------------------------------
+--=============================================================================
 -- Helper Functions
------------------------------------------------------------------------------
+--=============================================================================
 local function GetTimestamp()
   local hour, minute = GetGameTime()
   return string.format("%02d:%02d", hour, minute)
@@ -51,16 +53,13 @@ local function AddToBuffer(line)
 end
 
 local function UpdateDisplay()
-  if not debugFrame or not debugFrame:IsVisible() then
-    return
-  end
+  if not debugFrame then return end
+  if not debugFrame:IsVisible() then return end
 
   local scrollFrame = getglobal("AutoLFM_DebugWindow_ScrollFrame")
   local editBox = getglobal("AutoLFM_DebugWindow_EditBox")
 
-  if not editBox then
-    return
-  end
+  if not editBox then return end
 
   local text = table.concat(logBuffer, "\n")
   editBox:SetText(text)
@@ -78,10 +77,10 @@ local function UpdateDisplay()
   end
 end
 
------------------------------------------------------------------------------
+--=============================================================================
 -- Public Logging API
------------------------------------------------------------------------------
-function AutoLFM.Debug.DebugWindow.LogEvent(eventName, ...)
+--=============================================================================
+function M.LogEvent(eventName, ...)
   local argsStr = ""
 
   if arg.n > 0 then
@@ -101,7 +100,7 @@ function AutoLFM.Debug.DebugWindow.LogEvent(eventName, ...)
   end
 end
 
-function AutoLFM.Debug.DebugWindow.LogCommand(commandName, ...)
+function M.LogCommand(commandName, ...)
   local argsStr = ""
 
   if arg.n > 0 then
@@ -121,7 +120,9 @@ function AutoLFM.Debug.DebugWindow.LogCommand(commandName, ...)
   end
 end
 
-function AutoLFM.Debug.DebugWindow.LogError(message)
+function M.LogError(message)
+  if not message then return end
+
   local line = FormatLogLine("ERROR", message)
   AddToBuffer(line)
 
@@ -130,7 +131,9 @@ function AutoLFM.Debug.DebugWindow.LogError(message)
   end
 end
 
-function AutoLFM.Debug.DebugWindow.LogWarning(message)
+function M.LogWarning(message)
+  if not message then return end
+
   local line = FormatLogLine("WARNING", message)
   AddToBuffer(line)
 
@@ -139,7 +142,9 @@ function AutoLFM.Debug.DebugWindow.LogWarning(message)
   end
 end
 
-function AutoLFM.Debug.DebugWindow.LogInfo(message)
+function M.LogInfo(message)
+  if not message then return end
+
   local line = FormatLogLine("INFO", message)
   AddToBuffer(line)
 
@@ -148,7 +153,9 @@ function AutoLFM.Debug.DebugWindow.LogInfo(message)
   end
 end
 
-function AutoLFM.Debug.DebugWindow.LogAction(message)
+function M.LogAction(message)
+  if not message then return end
+
   local line = FormatLogLine("ACTION", message)
   AddToBuffer(line)
 
@@ -157,7 +164,9 @@ function AutoLFM.Debug.DebugWindow.LogAction(message)
   end
 end
 
-function AutoLFM.Debug.DebugWindow.LogListener(message)
+function M.LogListener(message)
+  if not message then return end
+
   -- Silent logging for listener operations (no category, just gray timestamp and message)
   local timestamp = COLORS.TIMESTAMP .. "[" .. GetTimestamp() .. "]" .. COLORS.RESET
   local line = timestamp .. " " .. COLORS.TIMESTAMP .. message .. COLORS.RESET
@@ -168,24 +177,26 @@ function AutoLFM.Debug.DebugWindow.LogListener(message)
   end
 end
 
------------------------------------------------------------------------------
+--=============================================================================
 -- Window Management
------------------------------------------------------------------------------
-function AutoLFM.Debug.DebugWindow.Show()
+--=============================================================================
+function M.Show()
   if not debugFrame then
-    AutoLFM.Debug.DebugWindow.CreateFrame()
+    M.CreateFrame()
   end
 
-  debugFrame:Show()
+  if debugFrame then
+    debugFrame:Show()
+  end
   isEnabled = true
 
   -- Update display with all buffered logs
   UpdateDisplay()
 
-  AutoLFM.Debug.DebugWindow.LogInfo("Debug window opened")
+  M.LogInfo("Debug window opened")
 end
 
-function AutoLFM.Debug.DebugWindow.Hide()
+function M.Hide()
   if debugFrame then
     debugFrame:Hide()
   end
@@ -193,31 +204,29 @@ function AutoLFM.Debug.DebugWindow.Hide()
   isEnabled = false
 end
 
-function AutoLFM.Debug.DebugWindow.Toggle()
+function M.Toggle()
   if debugFrame and debugFrame:IsVisible() then
-    AutoLFM.Debug.DebugWindow.Hide()
+    M.Hide()
   else
-    AutoLFM.Debug.DebugWindow.Show()
+    M.Show()
   end
 end
 
-function AutoLFM.Debug.DebugWindow.IsVisible()
+function M.IsVisible()
   return debugFrame and debugFrame:IsVisible() or false
 end
 
-function AutoLFM.Debug.DebugWindow.Clear()
+function M.Clear()
   logBuffer = {}
   UpdateDisplay()
-  AutoLFM.Debug.DebugWindow.LogInfo("Debug log cleared")
+  M.LogInfo("Debug log cleared")
 end
 
------------------------------------------------------------------------------
+--=============================================================================
 -- Frame Creation
------------------------------------------------------------------------------
-function AutoLFM.Debug.DebugWindow.CreateFrame()
-  if debugFrame then
-    return
-  end
+--=============================================================================
+function M.CreateFrame()
+  if debugFrame then return end
 
   -- Main Frame
   debugFrame = CreateFrame("Frame", "AutoLFM_DebugWindow", UIParent)
@@ -246,7 +255,7 @@ function AutoLFM.Debug.DebugWindow.CreateFrame()
   local closeButton = CreateFrame("Button", nil, debugFrame, "UIPanelCloseButton")
   closeButton:SetPoint("TOPRIGHT", debugFrame, "TOPRIGHT", -5, -5)
   closeButton:SetScript("OnClick", function()
-    AutoLFM.Debug.DebugWindow.Hide()
+    M.Hide()
   end)
 
   -- Clear Button
@@ -256,7 +265,7 @@ function AutoLFM.Debug.DebugWindow.CreateFrame()
   clearButton:SetPoint("BOTTOMLEFT", debugFrame, "BOTTOMLEFT", 15, 15)
   clearButton:SetText("Clear")
   clearButton:SetScript("OnClick", function()
-    AutoLFM.Debug.DebugWindow.Clear()
+    M.Clear()
   end)
 
   -- Select All Button
@@ -283,7 +292,9 @@ function AutoLFM.Debug.DebugWindow.CreateFrame()
     if AutoLFM.Debug and AutoLFM.Debug.PrintEventListeners then
       AutoLFM.Debug.PrintEventListeners()
     else
-      AutoLFM.Core.Utils.PrintError("Debug module not fully loaded")
+      if AutoLFM.Core and AutoLFM.Core.Utils then
+        AutoLFM.Core.Utils.PrintError("Debug module not fully loaded")
+      end
     end
   end)
 
@@ -297,7 +308,9 @@ function AutoLFM.Debug.DebugWindow.CreateFrame()
     if AutoLFM.Debug and AutoLFM.Debug.PrintCommands then
       AutoLFM.Debug.PrintCommands()
     else
-      AutoLFM.Core.Utils.PrintError("Debug module not fully loaded")
+      if AutoLFM.Core and AutoLFM.Core.Utils then
+        AutoLFM.Core.Utils.PrintError("Debug module not fully loaded")
+      end
     end
   end)
 
@@ -353,14 +366,20 @@ function AutoLFM.Debug.DebugWindow.CreateFrame()
   end)
 
   -- Register with DarkUI if available
-  if AutoLFM.Components and AutoLFM.Components.DarkUI and AutoLFM.Components.DarkUI.RegisterFrame then
-    AutoLFM.Components.DarkUI.RegisterFrame(debugFrame)
+  if AutoLFM.Components then
+    if AutoLFM.Components.Themes then
+      if AutoLFM.Components.Themes.DarkUI then
+        if AutoLFM.Components.Themes.DarkUI.RegisterFrame then
+          AutoLFM.Components.Themes.DarkUI.RegisterFrame(debugFrame)
+        end
+      end
+    end
   end
 end
 
------------------------------------------------------------------------------
+--=============================================================================
 -- Initialize (called automatically on load)
------------------------------------------------------------------------------
-function AutoLFM.Debug.DebugWindow.Init()
+--=============================================================================
+function M.Init()
   -- Nothing to do on init, window is created on demand
 end

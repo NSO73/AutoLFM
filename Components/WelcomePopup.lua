@@ -6,20 +6,20 @@ AutoLFM = AutoLFM or {}
 AutoLFM.Components = AutoLFM.Components or {}
 AutoLFM.Components.WelcomePopup = AutoLFM.Components.WelcomePopup or {}
 
-local M = AutoLFM.Components.WelcomePopup
 
--------------------------------------------------------------------------------
+
+--=============================================================================
 -- Local Constants
--------------------------------------------------------------------------------
+--=============================================================================
 local TYPING_SPEED = 0.03
 local FADE_IN_DURATION = 0.5
 local FADE_OUT_DURATION = 1.5
 local DISPLAY_DURATION = 4.0
 local INITIAL_WAIT = 0.5
 
--------------------------------------------------------------------------------
+--=============================================================================
 -- Local State
--------------------------------------------------------------------------------
+--=============================================================================
 local popupFrame, titleLabel
 local labels = {}
 local padding, textPadding = 18, 6
@@ -35,9 +35,9 @@ local waitBeforeStart, waitBeforeFade = 0, 0
 local typingActive, fadeActive, waitingActive = false, false, false
 local lastUpdate = nil
 
--------------------------------------------------------------------------------
+--=============================================================================
 -- Data
--------------------------------------------------------------------------------
+--=============================================================================
 local titleBlocks = {
   {text = "Thank you for using ", r = 0.9, g = 0.9, b = 0.9},
   {text = "Auto", r = 0.9, g = 0.9, b = 0.9},
@@ -81,10 +81,14 @@ local messages = {
   }, lineIndex = 11},
 }
 
--------------------------------------------------------------------------------
+--=============================================================================
 -- Helpers
--------------------------------------------------------------------------------
+--=============================================================================
 M.GetPartialTitleText = function(blockIndex, letterIndex)
+  if not AutoLFM.Core then return "" end
+  if not AutoLFM.Core.Utils then return "" end
+  if not AutoLFM.Core.Utils.RGBToHex then return "" end
+
   local text = ""
   for i = 1, blockIndex do
     local block = titleBlocks[i]
@@ -101,11 +105,15 @@ M.GetPartialTitleText = function(blockIndex, letterIndex)
 end
 
 local function GetPartialColoredLine()
+  if not AutoLFM.Core then return "" end
+  if not AutoLFM.Core.Utils then return "" end
+  if not AutoLFM.Core.Utils.RGBToHex then return "" end
+
   local txt = ""
   local count = 0
   local line = messages[2]
   if not line or not line.subblocks then return "" end
-  
+
   for _, block in ipairs(line.subblocks) do
     local color = "|c" .. AutoLFM.Core.Utils.RGBToHex(block.r, block.g, block.b)
     for i = 1, string.len(block.text) do
@@ -122,16 +130,16 @@ end
 
 M.FadeFrame = function(frame, mode, duration, onFinish)
   if not frame then return end
-  
+
   fadeMode, fadeElapsed, fadeTotal = mode, 0, duration
   fadeFunc, fadeActive = onFinish, true
   frame:SetAlpha(mode == "IN" and 0 or 1)
   if mode == "IN" then frame:Show() end
 end
 
--------------------------------------------------------------------------------
+--=============================================================================
 -- Create Popup
--------------------------------------------------------------------------------
+--=============================================================================
 M.CreatePopup = function()
   local frame = CreateFrame("Frame", "AutoLFM_WelcomePopup", UIParent)
   frame:SetBackdrop({
@@ -143,22 +151,22 @@ M.CreatePopup = function()
   frame:SetPoint("CENTER", UIParent, "CENTER", 0, 250)
   frame:SetWidth(50)
   frame:Hide()
-  
+
   local tmp = frame:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
   tmp:SetText("M")
   titleLineHeight = tmp:GetHeight() or 20
   tmp:SetFont("Fonts\\FRIZQT__.TTF", 14)
   textLineHeight = tmp:GetHeight() or 14
   tmp:Hide()
-  
+
   initialHeight = titleLineHeight + padding * 2
   frame:SetHeight(initialHeight)
-  
+
   titleLabel = frame:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
   titleLabel:SetFont("Fonts\\FRIZQT__.TTF", 22, "OUTLINE")
   titleLabel:SetJustifyH("CENTER")
   titleLabel:SetPoint("TOP", frame, "TOP", 0, -padding)
-  
+
   local i = 1
   while messages[i] do
     local lbl = frame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
@@ -169,18 +177,22 @@ M.CreatePopup = function()
     labels[i] = lbl
     i = i + 1
   end
-  
+
   return frame
 end
 
--------------------------------------------------------------------------------
+--=============================================================================
 -- OnUpdate
--------------------------------------------------------------------------------
+--=============================================================================
 M.OnUpdate = function()
+  if not AutoLFM.Core then return end
+  if not AutoLFM.Core.Utils then return end
+  if not AutoLFM.Core.Utils.RGBToHex then return end
+
   local now = GetTime()
   local elapsed = lastUpdate and (now - lastUpdate) or 0
   lastUpdate = now
-  
+
   if fadeActive then
     fadeElapsed = fadeElapsed + elapsed
     local progress = fadeElapsed / fadeTotal
@@ -197,7 +209,7 @@ M.OnUpdate = function()
     end
     return
   end
-  
+
   if waitingActive then
     waitBeforeStart = waitBeforeStart + elapsed
     if waitBeforeStart > INITIAL_WAIT then
@@ -208,12 +220,12 @@ M.OnUpdate = function()
     end
     return
   end
-  
+
   if typingActive then
     typingElapsed = typingElapsed + elapsed
     if typingElapsed > TYPING_SPEED then
       typingElapsed = 0
-      
+
       if titleBlocks[titleBlockIndex] then
         local block = titleBlocks[titleBlockIndex]
         if titleLetterIndex < string.len(block.text) then
@@ -225,7 +237,7 @@ M.OnUpdate = function()
           titleBlockIndex = titleBlockIndex + 1
           titleLetterIndex = 0
         end
-        
+
       elseif currentLine == 2 and messages[2] and messages[2].subblocks then
         coloredLetterIndex = coloredLetterIndex + 1
         if labels[2] then
@@ -239,7 +251,7 @@ M.OnUpdate = function()
           coloredLetterIndex = 0
           currentLine = currentLine + 1
         end
-        
+
       else
         local msg = messages[currentLine]
         local lbl = labels[currentLine]
@@ -260,7 +272,7 @@ M.OnUpdate = function()
               end
             end
             lbl:SetText(txt)
-            
+
             local totalChars = 0
             for _, block in ipairs(msg.subblocks) do
               totalChars = totalChars + string.len(block.text)
@@ -282,19 +294,19 @@ M.OnUpdate = function()
           end
         end
       end
-      
+
       if not titleLabel or not popupFrame then return end
-      
+
       local maxWidth = titleLabel:GetStringWidth()
       local totalHeight = titleLineHeight + padding * 2
-      
+
       local lastIndex = 0
       for i, lbl in ipairs(labels) do
         if lbl:GetText() ~= "" then
           lastIndex = i
         end
       end
-      
+
       for i, lbl in ipairs(labels) do
         local t = lbl:GetText() or ""
         if t ~= "" then
@@ -307,10 +319,10 @@ M.OnUpdate = function()
           end
         end
       end
-      
+
       popupFrame:SetWidth(maxWidth + padding * 2)
       popupFrame:SetHeight(totalHeight)
-      
+
       if not messages[currentLine] then
         typingActive = false
         waitBeforeFade = 0
@@ -318,15 +330,17 @@ M.OnUpdate = function()
     end
     return
   end
-  
+
   if not typingActive and not fadeActive and not waitingActive then
     waitBeforeFade = waitBeforeFade + elapsed
     if waitBeforeFade > DISPLAY_DURATION then
-      M.FadeFrame(popupFrame, "OUT", FADE_OUT_DURATION, function()
+      AutoLFM.Components.WelcomePopup.FadeFrame(popupFrame, "OUT", FADE_OUT_DURATION, function()
         if popupFrame then
           popupFrame:Hide()
         end
-        AutoLFM.Core.Persistent.SetWelcomeShown(true)
+        if AutoLFM.Core and AutoLFM.Core.Persistent then
+          AutoLFM.Core.Persistent.SetWelcomeShown(true)
+        end
         if popupFrame then
           popupFrame:SetScript("OnUpdate", nil)
         end
@@ -335,39 +349,46 @@ M.OnUpdate = function()
   end
 end
 
--------------------------------------------------------------------------------
+--=============================================================================
 -- Public API
--------------------------------------------------------------------------------
-M.Init = function()
-  if M.ShouldShow() then M.Show() end
+--=============================================================================
+function AutoLFM.Components.WelcomePopup.Init()
+  if AutoLFM.Components.WelcomePopup.ShouldShow() then
+    AutoLFM.Components.WelcomePopup.Show()
+  end
 end
 
-M.ShouldShow = function()
+function AutoLFM.Components.WelcomePopup.ShouldShow()
+  if not AutoLFM.Core then return false end
+  if not AutoLFM.Core.Persistent then return false end
+
   return not AutoLFM.Core.Persistent.GetWelcomeShown()
 end
 
-M.Show = function()
-  popupFrame = popupFrame or M.CreatePopup()
+function AutoLFM.Components.WelcomePopup.Show()
+  popupFrame = popupFrame or AutoLFM.Components.WelcomePopup.CreatePopup()
   if not popupFrame then return end
-  
+
   lastUpdate = nil
-  
+
   titleBlockIndex, titleLetterIndex = 1, 0
   currentLine, messageLetterIndex, coloredLetterIndex = 1, 0, 0
   typingElapsed, fadeElapsed, waitBeforeFade, waitBeforeStart = 0, 0, 0, 0
   fadeActive, typingActive, waitingActive = false, false, true
-  
+
   popupFrame:SetAlpha(0)
   popupFrame:SetHeight(initialHeight)
   popupFrame:SetWidth(50)
   popupFrame:Show()
   popupFrame:SetPoint("CENTER", UIParent, "CENTER", 0, 250)
-  popupFrame:SetScript("OnUpdate", M.OnUpdate)
+  popupFrame:SetScript("OnUpdate", AutoLFM.Components.WelcomePopup.OnUpdate)
 
-  M.FadeFrame(popupFrame, "IN", FADE_IN_DURATION)
+  AutoLFM.Components.WelcomePopup.FadeFrame(popupFrame, "IN", FADE_IN_DURATION)
 end
 
------------------------------------------------------------------------------
+--=============================================================================
 -- Auto-register initialization
------------------------------------------------------------------------------
-AutoLFM.Core.Maestro.RegisterInit("WelcomePopup", "Components.WelcomePopup.Init")
+--=============================================================================
+if AutoLFM.Core and AutoLFM.Core.Maestro then
+  AutoLFM.Core.Maestro.RegisterInit("WelcomePopup", "Components.WelcomePopup.Init")
+end

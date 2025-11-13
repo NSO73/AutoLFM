@@ -1,0 +1,124 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/">
+  <Script file="UI\Content\Raids.lua"/>
+
+  <!--==========================================================================
+    Raids Content Panel
+    ==========================================================================
+    Displays a list of all available raids with checkboxes and size sliders
+    ==========================================================================-->
+  <Frame name="AutoLFM_Content_Raids" parent="AutoLFM_MainFrame_Content" hidden="true" virtual="true">
+    <Size>
+      <AbsDimension x="298" y="230"/>
+    </Size>
+    <Anchors>
+      <Anchor point="TOPLEFT"/>
+    </Anchors>
+    <Frames>
+      <!-- Raid Row Template (Checkbox + Slider) -->
+      <Frame name="AutoLFM_RaidRow_Template" virtual="true">
+        <Size>
+          <AbsDimension x="280" y="40"/>
+        </Size>
+        <Frames>
+          <!-- Checkbox -->
+          <CheckButton name="$parent_Checkbox" inherits="UICheckButtonTemplate">
+            <Size>
+              <AbsDimension x="260" y="20"/>
+            </Size>
+            <Anchors>
+              <Anchor point="TOPLEFT">
+                <Offset>
+                  <AbsDimension x="0" y="0"/>
+                </Offset>
+              </Anchor>
+            </Anchors>
+            <Layers>
+              <Layer level="ARTWORK">
+                <FontString name="$parent_Label" inherits="GameFontNormalSmall" justifyH="LEFT">
+                  <Size>
+                    <AbsDimension x="240" y="20"/>
+                  </Size>
+                  <Anchors>
+                    <Anchor point="LEFT">
+                      <Offset>
+                        <AbsDimension x="25" y="0"/>
+                      </Offset>
+                    </Anchor>
+                  </Anchors>
+                </FontString>
+              </Layer>
+            </Layers>
+            <Scripts>
+              <OnClick>
+                AutoLFM.UI.Content.Raids.OnRaidToggle(this:GetParent())
+              </OnClick>
+              <OnEnter>
+                AutoLFM.UI.Content.Raids.OnRaidEnter(this:GetParent())
+              </OnEnter>
+              <OnLeave>
+                GameTooltip:Hide()
+              </OnLeave>
+            </Scripts>
+          </CheckButton>
+          <!-- Size Slider -->
+          <Slider name="$parent_Slider" inherits="OptionsSliderTemplate" hidden="true">
+            <Size>
+              <AbsDimension x="220" y="17"/>
+            </Size>
+            <Anchors>
+              <Anchor point="TOPLEFT">
+                <Offset>
+                  <AbsDimension x="30" y="-22"/>
+                </Offset>
+              </Anchor>
+            </Anchors>
+            <Layers>
+              <Layer level="ARTWORK">
+                <FontString name="$parent_Low" inherits="GameFontHighlightSmall" text="10">
+                  <Anchors>
+                    <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT">
+                      <Offset>
+                        <AbsDimension x="2" y="3"/>
+                      </Offset>
+                    </Anchor>
+                  </Anchors>
+                </FontString>
+                <FontString name="$parent_High" inherits="GameFontHighlightSmall" text="40">
+                  <Anchors>
+                    <Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT">
+                      <Offset>
+                        <AbsDimension x="-2" y="3"/>
+                      </Offset>
+                    </Anchor>
+                  </Anchors>
+                </FontString>
+                <FontString name="$parent_Text" inherits="GameFontHighlightSmall">
+                  <Anchors>
+                    <Anchor point="TOP" relativePoint="BOTTOM">
+                      <Offset>
+                        <AbsDimension x="0" y="3"/>
+                      </Offset>
+                    </Anchor>
+                  </Anchors>
+                </FontString>
+              </Layer>
+            </Layers>
+            <Scripts>
+              <OnValueChanged>
+                AutoLFM.UI.Content.Raids.OnSizeChanged(this:GetParent(), arg1)
+              </OnValueChanged>
+            </Scripts>
+          </Slider>
+        </Frames>
+      </Frame>
+    </Frames>
+    <Scripts>
+      <OnLoad>
+        AutoLFM.UI.Content.Raids.OnLoad(this)
+      </OnLoad>
+      <OnShow>
+        AutoLFM.UI.Content.Raids.OnShow(this)
+      </OnShow>
+    </Scripts>
+  </Frame>
+</Ui>

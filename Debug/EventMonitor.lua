@@ -6,20 +6,27 @@ AutoLFM = AutoLFM or {}
 AutoLFM.Debug = AutoLFM.Debug or {}
 AutoLFM.Debug.EventMonitor = AutoLFM.Debug.EventMonitor or {}
 
------------------------------------------------------------------------------
+local M = AutoLFM.Debug.EventMonitor
+
+--=============================================================================
 -- Private state
------------------------------------------------------------------------------
+--=============================================================================
 local isMonitoring = false
 local registeredListeners = {}
 
------------------------------------------------------------------------------
+--=============================================================================
 -- Event Monitor
------------------------------------------------------------------------------
-function AutoLFM.Debug.EventMonitor.Start()
+--=============================================================================
+function M.Start()
   if isMonitoring then
-    AutoLFM.Core.Utils.PrintWarning("Event monitoring is already active")
+    if AutoLFM.Core and AutoLFM.Core.Utils then
+      AutoLFM.Core.Utils.PrintWarning("Event monitoring is already active")
+    end
     return
   end
+
+  if not AutoLFM.Core then return end
+  if not AutoLFM.Core.Maestro then return end
 
   -- List of all known events
   local events = {
@@ -74,14 +81,21 @@ function AutoLFM.Debug.EventMonitor.Start()
   end
 
   isMonitoring = true
-  AutoLFM.Core.Utils.PrintInfo("Event monitoring enabled (" .. table.getn(events) .. " events)")
+  if AutoLFM.Core and AutoLFM.Core.Utils then
+    AutoLFM.Core.Utils.PrintInfo("Event monitoring enabled (" .. table.getn(events) .. " events)")
+  end
 end
 
-function AutoLFM.Debug.EventMonitor.Stop()
+function M.Stop()
   if not isMonitoring then
-    AutoLFM.Core.Utils.PrintWarning("Event monitoring is not active")
+    if AutoLFM.Core and AutoLFM.Core.Utils then
+      AutoLFM.Core.Utils.PrintWarning("Event monitoring is not active")
+    end
     return
   end
+
+  if not AutoLFM.Core then return end
+  if not AutoLFM.Core.Maestro then return end
 
   -- Unregister all listeners
   for i = 1, table.getn(registeredListeners) do
@@ -91,114 +105,124 @@ function AutoLFM.Debug.EventMonitor.Stop()
 
   registeredListeners = {}
   isMonitoring = false
-  AutoLFM.Core.Utils.PrintInfo("Event monitoring disabled")
+  if AutoLFM.Core and AutoLFM.Core.Utils then
+    AutoLFM.Core.Utils.PrintInfo("Event monitoring disabled")
+  end
 end
 
-function AutoLFM.Debug.EventMonitor.IsMonitoring()
+function M.IsMonitoring()
   return isMonitoring
 end
 
------------------------------------------------------------------------------
+--=============================================================================
 -- Shortcuts
------------------------------------------------------------------------------
+--=============================================================================
 function AutoLFM.Debug.MonitorAllEvents()
-  AutoLFM.Debug.EventMonitor.Start()
+  M.Start()
 end
 
 function AutoLFM.Debug.StopMonitoring()
-  AutoLFM.Debug.EventMonitor.Stop()
+  M.Stop()
 end
 
------------------------------------------------------------------------------
+--=============================================================================
 -- Print registered events and listeners with details
------------------------------------------------------------------------------
+--=============================================================================
 function AutoLFM.Debug.PrintEventListeners()
-  if AutoLFM.Debug.DebugWindow and AutoLFM.Debug.DebugWindow.LogInfo then
-    AutoLFM.Debug.DebugWindow.LogInfo("=== AutoLFM Event Listeners ===")
-    AutoLFM.Debug.DebugWindow.LogInfo(" ")
+  if not AutoLFM.Debug.DebugWindow then return end
+  if not AutoLFM.Debug.DebugWindow.LogInfo then return end
+  if not AutoLFM.Core then return end
+  if not AutoLFM.Core.Maestro then return end
+  if not AutoLFM.Core.Maestro.eventListeners then return end
 
-    local eventCount = 0
-    local listenerCount = 0
+  AutoLFM.Debug.DebugWindow.LogInfo("=== AutoLFM Event Listeners ===")
+  AutoLFM.Debug.DebugWindow.LogInfo(" ")
 
-    -- Collect and sort event names
-    local eventNames = {}
-    for eventName, _ in pairs(AutoLFM.Core.Maestro.eventListeners) do
-      table.insert(eventNames, eventName)
-    end
-    table.sort(eventNames)
+  local eventCount = 0
+  local listenerCount = 0
 
-    -- Display each event with its listeners
-    for i = 1, table.getn(eventNames) do
-      local eventName = eventNames[i]
-      local listeners = AutoLFM.Core.Maestro.eventListeners[eventName]
-      local count = table.getn(listeners)
-      eventCount = eventCount + 1
-      listenerCount = listenerCount + count
-
-      -- Event header
-      AutoLFM.Debug.DebugWindow.LogInfo(eventName .. " (" .. count .. " listener" .. (count > 1 and "s" or "") .. ")")
-
-      -- List each listener with details
-      for j = 1, count do
-        local listener = listeners[j]
-        local metadata = AutoLFM.Core.Maestro.listenerMetadata[listener]
-
-        if metadata then
-          local displayText = metadata.description
-          if not displayText or displayText == "" then
-            displayText = metadata.source
-            if metadata.line and metadata.line ~= "" then
-              displayText = displayText .. metadata.line
-            end
-          end
-
-          -- Show only description if available, otherwise show source
-          if metadata.description and metadata.description ~= "" then
-            AutoLFM.Debug.DebugWindow.LogInfo("  - " .. metadata.description)
-          else
-            local sourceInfo = metadata.source
-            if metadata.line and metadata.line ~= "" then
-              sourceInfo = sourceInfo .. metadata.line
-            end
-            AutoLFM.Debug.DebugWindow.LogInfo("  - " .. sourceInfo)
-          end
-        else
-          AutoLFM.Debug.DebugWindow.LogInfo("  - unknown listener")
-        end
-      end
-
-      AutoLFM.Debug.DebugWindow.LogInfo(" ")
-    end
-
-    local total = "Total: " .. eventCount .. " event" .. (eventCount > 1 and "s" or "") ..
-                  ", " .. listenerCount .. " listener" .. (listenerCount > 1 and "s" or "")
-    AutoLFM.Debug.DebugWindow.LogInfo(total)
+  -- Collect and sort event names
+  local eventNames = {}
+  for eventName, _ in pairs(AutoLFM.Core.Maestro.eventListeners) do
+    table.insert(eventNames, eventName)
   end
+  table.sort(eventNames)
+
+  -- Display each event with its listeners
+  for i = 1, table.getn(eventNames) do
+    local eventName = eventNames[i]
+    local listeners = AutoLFM.Core.Maestro.eventListeners[eventName]
+    local count = table.getn(listeners)
+    eventCount = eventCount + 1
+    listenerCount = listenerCount + count
+
+    -- Event header
+    AutoLFM.Debug.DebugWindow.LogInfo(eventName .. " (" .. count .. " listener" .. (count > 1 and "s" or "") .. ")")
+
+    -- List each listener with details
+    for j = 1, count do
+      local listener = listeners[j]
+      local metadata = AutoLFM.Core.Maestro.listenerMetadata[listener]
+
+      if metadata then
+        local displayText = metadata.description
+        if not displayText or displayText == "" then
+          displayText = metadata.source
+          if metadata.line and metadata.line ~= "" then
+            displayText = displayText .. metadata.line
+          end
+        end
+
+        -- Show only description if available, otherwise show source
+        if metadata.description and metadata.description ~= "" then
+          AutoLFM.Debug.DebugWindow.LogInfo("  - " .. metadata.description)
+        else
+          local sourceInfo = metadata.source
+          if metadata.line and metadata.line ~= "" then
+            sourceInfo = sourceInfo .. metadata.line
+          end
+          AutoLFM.Debug.DebugWindow.LogInfo("  - " .. sourceInfo)
+        end
+      else
+        AutoLFM.Debug.DebugWindow.LogInfo("  - unknown listener")
+      end
+    end
+
+    AutoLFM.Debug.DebugWindow.LogInfo(" ")
+  end
+
+  local total = "Total: " .. eventCount .. " event" .. (eventCount > 1 and "s" or "") ..
+                ", " .. listenerCount .. " listener" .. (listenerCount > 1 and "s" or "")
+  AutoLFM.Debug.DebugWindow.LogInfo(total)
 end
 
------------------------------------------------------------------------------
+--=============================================================================
 -- Print registered commands
------------------------------------------------------------------------------
+--=============================================================================
 function AutoLFM.Debug.PrintCommands()
-  if AutoLFM.Debug.DebugWindow and AutoLFM.Debug.DebugWindow.LogInfo then
-    AutoLFM.Debug.DebugWindow.LogInfo("=== AutoLFM Commands ===")
+  if not AutoLFM.Debug.DebugWindow then return end
+  if not AutoLFM.Debug.DebugWindow.LogInfo then return end
+  if not AutoLFM.Core then return end
+  if not AutoLFM.Core.Maestro then return end
+  if not AutoLFM.Core.Maestro.commandHandlers then return end
 
-    local commandCount = 0
-    local commands = {}
+  AutoLFM.Debug.DebugWindow.LogInfo("=== AutoLFM Commands ===")
 
-    for commandName, _ in pairs(AutoLFM.Core.Maestro.commandHandlers) do
-      commandCount = commandCount + 1
-      table.insert(commands, commandName)
-    end
+  local commandCount = 0
+  local commands = {}
 
-    -- Sort alphabetically
-    table.sort(commands)
-
-    for i = 1, table.getn(commands) do
-      AutoLFM.Debug.DebugWindow.LogInfo(commands[i])
-    end
-
-    local total = "Total: " .. commandCount .. " command" .. (commandCount > 1 and "s" or "")
-    AutoLFM.Debug.DebugWindow.LogInfo(total)
+  for commandName, _ in pairs(AutoLFM.Core.Maestro.commandHandlers) do
+    commandCount = commandCount + 1
+    table.insert(commands, commandName)
   end
+
+  -- Sort alphabetically
+  table.sort(commands)
+
+  for i = 1, table.getn(commands) do
+    AutoLFM.Debug.DebugWindow.LogInfo(commands[i])
+  end
+
+  local total = "Total: " .. commandCount .. " command" .. (commandCount > 1 and "s" or "")
+  AutoLFM.Debug.DebugWindow.LogInfo(total)
 end

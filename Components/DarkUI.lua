@@ -1,13 +1,16 @@
-﻿--=============================================================================
--- AutoLFM: Dark UI
+--=============================================================================
+-- AutoLFM: Dark UI Theme
+--   Provides dark theme functionality for AutoLFM UI elements
 --=============================================================================
 AutoLFM = AutoLFM or {}
 AutoLFM.Components = AutoLFM.Components or {}
 AutoLFM.Components.DarkUI = AutoLFM.Components.DarkUI or {}
 
------------------------------------------------------------------------------
+
+
+--=============================================================================
 -- Constants
------------------------------------------------------------------------------
+--=============================================================================
 local COLOR_PRESETS = {
   yellow = {r = 1, g = 1, b = 0},
   gold = {r = 1, g = 0.82, b = 0},
@@ -22,30 +25,30 @@ local COLOR_PRESETS = {
 }
 
 local TEXTURES = {
-  TOOLTIP_BACKGROUND = "tooltipBackground",
-  TOOLTIP_BORDER = "tooltipBorder",
-  SLIDER_BUTTON = "sliderButtonHorizontal",
-  SLIDER_BACKGROUND = "sliderBackground",
-  SLIDER_BACKGROUND_LIGHT = "sliderBackgroundLight",
-  SLIDER_BORDER = "sliderBorder",
-  WHITE = "white",
+  TOOLTIP_BACKGROUND = "TooltipBackground",
+  TOOLTIP_BORDER = "TooltipBorder",
+  SLIDER_BUTTON = "SliderButtonl",
+  SLIDER_BACKGROUND = "SliderBackground",
+  SLIDER_BACKGROUND_LIGHT = "SliderBackgroundLight",
+  SLIDER_BORDER = "SliderBorder",
+  WHITE = "White",
   BUTTON_ROTATION_LEFT = "Icons\\buttonRotationLeft",
   BUTTON_HIGHLIGHT = "Icons\\buttonHighlight"
 }
 
 local DARKUI_BLACKLIST = {
-  ["Eyes\\"] = true,
-  ["preview"] = true,
-  ["rolesTank"] = true,
-  ["rolesHeal"] = true,
-  ["rolesDps"] = true,
-  ["clearAll"] = true,
-  ["presets"] = true,
-  ["addPreset"] = true,
-  ["autoInvite"] = true,
-  ["options"] = true,
-  ["minimap"] = true,
-  ["tooltipBackground"] = true,
+  ["Eye\\"] = true,
+  ["Preview"] = true,
+  ["RolesTank"] = true,
+  ["RolesHeal"] = true,
+  ["RolesDps"] = true,
+  ["ClearAll"] = true,
+  ["Presets"] = true,
+  ["AddPreset"] = true,
+  ["AutoInvite"] = true,
+  ["Options"] = true,
+  ["Minimap"] = true,
+  ["TooltipBackground"] = true,
   ["Button"] = true,
   ["Check"] = true,
   ["Radio"] = true,
@@ -53,22 +56,22 @@ local DARKUI_BLACKLIST = {
 }
 
 local DARKUI_WHITELIST = {
-  ["mainFrame"] = true,
-  ["minimapBorder"] = true,
-  ["tabActive"] = true
+  ["MainFrame"] = true,
+  ["MinimapBorder"] = true,
+  ["BottomTabActive"] = true
 }
 
 local TEXTURE_PATH = "Interface\\AddOns\\AutoLFM3\\UI\\Textures\\"
 
------------------------------------------------------------------------------
+--=============================================================================
 -- Private State
------------------------------------------------------------------------------
+--=============================================================================
 local enabled = false
 local darkenedFrames = {}
 
------------------------------------------------------------------------------
+--=============================================================================
 -- Texture Filtering
------------------------------------------------------------------------------
+--=============================================================================
 local function IsWhitelisted(texturePath)
   if not texturePath then return false end
 
@@ -104,11 +107,13 @@ local function IsSliderBackdrop(backdrop)
   return backdrop.edgeSize == 8 and backdrop.tileSize == 8
 end
 
------------------------------------------------------------------------------
+--=============================================================================
 -- Frame Processing
------------------------------------------------------------------------------
+--=============================================================================
 local function ProcessBackdropColor(frame)
-  if not frame or not frame.SetBackdropColor or not frame.GetBackdrop then return end
+  if not frame then return end
+  if not frame.SetBackdropColor then return end
+  if not frame.GetBackdrop then return end
 
   local backdrop = frame:GetBackdrop()
   if not backdrop then return end
@@ -121,17 +126,21 @@ local function ProcessBackdropColor(frame)
 end
 
 local function ProcessBackdropBorder(frame)
-  if not frame or not frame.SetBackdropBorderColor then return end
+  if not frame then return end
+  if not frame.SetBackdropBorderColor then return end
 
   local dark = COLOR_PRESETS.dark
   frame:SetBackdropBorderColor(dark.r, dark.g, dark.b, dark.a)
 end
 
 local function ProcessSliderBackdrop(frame)
-  if not frame or not frame.SetBackdrop or not frame.GetBackdrop then return end
+  if not frame then return end
+  if not frame.SetBackdrop then return end
+  if not frame.GetBackdrop then return end
 
   local backdrop = frame:GetBackdrop()
-  if not backdrop or not IsSliderBackdrop(backdrop) then return end
+  if not backdrop then return end
+  if not IsSliderBackdrop(backdrop) then return end
 
   local newBackdrop = {
     bgFile = TEXTURE_PATH .. TEXTURES.SLIDER_BACKGROUND_LIGHT,
@@ -149,7 +158,8 @@ local function ProcessSliderBackdrop(frame)
 end
 
 local function ProcessRegions(frame)
-  if not frame or not frame.GetRegions then return end
+  if not frame then return end
+  if not frame.GetRegions then return end
 
   for _, region in pairs({frame:GetRegions()}) do
     if region and region.SetVertexColor and region:GetObjectType() == "Texture" then
@@ -174,8 +184,9 @@ local function ProcessRolesBackground(frame)
 end
 
 local function ProcessChildren(frame, processFunc)
-  if not frame or not frame.GetChildren then return end
-  
+  if not frame then return end
+  if not frame.GetChildren then return end
+
   for _, child in pairs({frame:GetChildren()}) do
     if child then
       processFunc(child)
@@ -183,9 +194,9 @@ local function ProcessChildren(frame, processFunc)
   end
 end
 
------------------------------------------------------------------------------
+--=============================================================================
 -- Core Darkening
------------------------------------------------------------------------------
+--=============================================================================
 function AutoLFM.Components.DarkUI.DarkenFrame(frame)
   if not enabled then return end
   if not frame then return end
@@ -201,12 +212,12 @@ function AutoLFM.Components.DarkUI.DarkenFrame(frame)
   end
 end
 
------------------------------------------------------------------------------
+--=============================================================================
 -- Theme Management
------------------------------------------------------------------------------
+--=============================================================================
 local function ApplyDarkTheme()
   if not enabled then return end
-  
+
   for _, frame in pairs(darkenedFrames) do
     if frame then
       AutoLFM.Components.DarkUI.DarkenFrame(frame)
@@ -215,18 +226,21 @@ local function ApplyDarkTheme()
 end
 
 local function ShowReloadMessage()
-  if not AutoLFM or not AutoLFM.Core or not AutoLFM.Core.Utils then return end
+  if not AutoLFM then return end
+  if not AutoLFM.Core then return end
+  if not AutoLFM.Core.Utils then return end
   if not AutoLFM.Color then return end
-  
+
   local msg = AutoLFM.Color("You must ", "orange") .. AutoLFM.Color("/reload", "gold") .. AutoLFM.Color(" to apply changes.", "orange")
   AutoLFM.Core.Utils.PrintSuccess(msg)
 end
 
------------------------------------------------------------------------------
+--=============================================================================
 -- Public API
------------------------------------------------------------------------------
+--=============================================================================
 function AutoLFM.Components.DarkUI.RegisterFrame(frame)
   if not frame then return end
+
   table.insert(darkenedFrames, frame)
 
   if enabled then
@@ -237,6 +251,7 @@ end
 function AutoLFM.Components.DarkUI.RefreshFrame(frame)
   if not enabled then return end
   if not frame then return end
+
   AutoLFM.Components.DarkUI.DarkenFrame(frame)
 end
 
@@ -273,19 +288,23 @@ function AutoLFM.Components.DarkUI.IsEnabled()
   return enabled
 end
 
------------------------------------------------------------------------------
+--=============================================================================
 -- Initialization
------------------------------------------------------------------------------
+--=============================================================================
 function AutoLFM.Components.DarkUI.Init()
-  if AutoLFM and AutoLFM.Core and AutoLFM.Core.Persistent then
-    enabled = AutoLFM.Core.Persistent.GetDarkMode()
-    if enabled then
-      ApplyDarkTheme()
-    end
+  if not AutoLFM then return end
+  if not AutoLFM.Core then return end
+  if not AutoLFM.Core.Persistent then return end
+
+  enabled = AutoLFM.Core.Persistent.GetDarkMode()
+  if enabled then
+    ApplyDarkTheme()
   end
 end
 
------------------------------------------------------------------------------
+--=============================================================================
 -- Auto-register initialization
------------------------------------------------------------------------------
-AutoLFM.Core.Maestro.RegisterInit("DarkUI", "Components.DarkUI.Init")
+--=============================================================================
+if AutoLFM.Core and AutoLFM.Core.Maestro then
+  AutoLFM.Core.Maestro.RegisterInit("DarkUI", "Components.DarkUI.Init")
+end

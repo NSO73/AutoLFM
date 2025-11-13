@@ -1,4 +1,5 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/">
+
   <!--==========================================================================
     AutoLFM Main Frame
     ==========================================================================
@@ -13,7 +14,7 @@
     </Anchors>
     <Layers>
       <Layer level="BACKGROUND">
-        <Texture file="Interface\AddOns\AutoLFM3\UI\Textures\mainBackground">
+        <Texture file="Interface\AddOns\AutoLFM3\UI\Textures\ContentBackground">
           <Size>
             <AbsDimension x="512" y="256"/>
           </Size>
@@ -27,7 +28,7 @@
         </Texture>
       </Layer>
       <Layer level="ARTWORK">
-        <Texture file="Interface\AddOns\AutoLFM3\UI\Textures\mainFrame">
+        <Texture file="Interface\AddOns\AutoLFM3\UI\Textures\MainFrame">
           <Size>
             <AbsDimension x="512" y="512"/>
           </Size>
@@ -37,7 +38,7 @@
         </Texture>
       </Layer>
       <Layer level="OVERLAY">
-        <Texture file="Interface\AddOns\AutoLFM3\UI\Textures\Eyes\eye01">
+        <Texture file="Interface\AddOns\AutoLFM3\UI\Textures\Eye\Eye00">
           <Size>
             <AbsDimension x="64" y="64"/>
           </Size>
@@ -95,7 +96,7 @@
         </Anchors>
         <Layers>
           <Layer level="BACKGROUND">
-            <Texture name="$parent_Background" file="Interface\AddOns\AutoLFM3\UI\Textures\rolesBackground">
+            <Texture name="$parent_Background" file="Interface\AddOns\AutoLFM3\UI\Textures\RolesBackground">
               <TexCoords left="0.2968" right="0.5937" top="0" bottom="0.5937"/>
               <Size>
                 <AbsDimension x="84" y="84"/>
@@ -110,7 +111,7 @@
             </Texture>
           </Layer>
           <Layer level="BORDER">
-            <Texture file="Interface\AddOns\AutoLFM3\UI\Textures\rolesTank">
+            <Texture file="Interface\AddOns\AutoLFM3\UI\Textures\RolesTank">
               <Anchors>
                 <Anchor point="TOPLEFT"/>
                 <Anchor point="BOTTOMRIGHT"/>
@@ -118,13 +119,13 @@
             </Texture>
           </Layer>
         </Layers>
-        <HighlightTexture file="Interface\AddOns\AutoLFM3\UI\Textures\rolesHighlight" alphaMode="ADD"/>
+        <HighlightTexture file="Interface\AddOns\AutoLFM3\UI\Textures\RolesHighlight" alphaMode="ADD"/>
         <Scripts>
           <OnLoad>
             getglobal(this:GetName() .. "_Background"):SetVertexColor(1, 1, 1, 0.6)
           </OnLoad>
           <OnClick>
-            AutoLFM.Core.Maestro.DispatchCommand("Roles.Toggle", "tank")
+            AutoLFM.Core.Maestro.Dispatch("roles.toggle", "tank")
           </OnClick>
         </Scripts>
       </Button>
@@ -159,7 +160,7 @@
         </Anchors>
         <Layers>
           <Layer level="BACKGROUND">
-            <Texture name="$parent_Background" file="Interface\AddOns\AutoLFM3\UI\Textures\rolesBackground">
+            <Texture name="$parent_Background" file="Interface\AddOns\AutoLFM3\UI\Textures\RolesBackground">
               <TexCoords left="0" right="0.2968" top="0" bottom="0.5937"/>
               <Size>
                 <AbsDimension x="84" y="84"/>
@@ -174,7 +175,7 @@
             </Texture>
           </Layer>
           <Layer level="BORDER">
-            <Texture file="Interface\AddOns\AutoLFM3\UI\Textures\rolesHeal">
+            <Texture file="Interface\AddOns\AutoLFM3\UI\Textures\RolesHeal">
               <Anchors>
                 <Anchor point="TOPLEFT"/>
                 <Anchor point="BOTTOMRIGHT"/>
@@ -182,13 +183,13 @@
             </Texture>
           </Layer>
         </Layers>
-        <HighlightTexture file="Interface\AddOns\AutoLFM3\UI\Textures\rolesHighlight" alphaMode="ADD"/>
+        <HighlightTexture file="Interface\AddOns\AutoLFM3\UI\Textures\RolesHighlight" alphaMode="ADD"/>
         <Scripts>
           <OnLoad>
             getglobal(this:GetName() .. "_Background"):SetVertexColor(1, 1, 1, 0.6)
           </OnLoad>
           <OnClick>
-            AutoLFM.Core.Maestro.DispatchCommand("Roles.Toggle", "heal")
+            AutoLFM.Core.Maestro.Dispatch("roles.toggle", "heal")
           </OnClick>
         </Scripts>
       </Button>
@@ -223,7 +224,7 @@
         </Anchors>
         <Layers>
           <Layer level="BACKGROUND">
-            <Texture name="$parent_Background" file="Interface\AddOns\AutoLFM3\UI\Textures\rolesBackground">
+            <Texture name="$parent_Background" file="Interface\AddOns\AutoLFM3\UI\Textures\RolesBackground">
               <TexCoords left="0.5937" right="0.8906" top="0" bottom="0.5937"/>
               <Size>
                 <AbsDimension x="84" y="84"/>
@@ -238,7 +239,7 @@
             </Texture>
           </Layer>
           <Layer level="BORDER">
-            <Texture file="Interface\AddOns\AutoLFM3\UI\Textures\rolesDps">
+            <Texture file="Interface\AddOns\AutoLFM3\UI\Textures\RolesDps">
               <Anchors>
                 <Anchor point="TOPLEFT"/>
                 <Anchor point="BOTTOMRIGHT"/>
@@ -246,13 +247,13 @@
             </Texture>
           </Layer>
         </Layers>
-        <HighlightTexture file="Interface\AddOns\AutoLFM3\UI\Textures\rolesHighlight" alphaMode="ADD"/>
+        <HighlightTexture file="Interface\AddOns\AutoLFM3\UI\Textures\RolesHighlight" alphaMode="ADD"/>
         <Scripts>
           <OnLoad>
             getglobal(this:GetName() .. "_Background"):SetVertexColor(1, 1, 1, 0.6)
           </OnLoad>
           <OnClick>
-            AutoLFM.Core.Maestro.DispatchCommand("Roles.Toggle", "dps")
+            AutoLFM.Core.Maestro.Dispatch("roles.toggle", "dps")
           </OnClick>
         </Scripts>
       </Button>
@@ -289,7 +290,6 @@
         </Anchors>
         <ScrollChild>
           <Frame name="AutoLFM_MainFrame_Content">
-            <Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background2"/>
             <Size>
               <AbsDimension x="298" y="230"/>
             </Size>
@@ -322,7 +322,7 @@
             this:Disable()
           </OnLoad>
           <OnClick>
-            AutoLFM.Logic.MainFrame.OnMainButtonClick()
+            AutoLFM.Core.Maestro.Dispatch("broadcaster.toggle")
           </OnClick>
         </Scripts>
       </Button>
@@ -343,7 +343,7 @@
         </Anchors>
         <Layers>
           <Layer level="BACKGROUND">
-            <Texture file="Interface\AddOns\AutoLFM3\UI\Textures\tabActive">
+            <Texture file="Interface\AddOns\AutoLFM3\UI\Textures\Tabs\BottomTabActive">
               <Anchors>
                 <Anchor point="TOPLEFT"/>
                 <Anchor point="BOTTOMRIGHT"/>
@@ -351,7 +351,7 @@
             </Texture>
           </Layer>
           <Layer level="BORDER">
-            <Texture name="$parent_Highlight" file="Interface\AddOns\AutoLFM3\UI\Textures\tabHighlight" hidden="true">
+            <Texture name="$parent_Highlight" file="Interface\AddOns\AutoLFM3\UI\Textures\Tabs\BottomTabHighlight" hidden="true">
               <Size>
                 <AbsDimension x="80" y="24"/>
               </Size>
@@ -389,7 +389,7 @@
         </Anchors>
         <Layers>
           <Layer level="BACKGROUND">
-            <Texture file="Interface\AddOns\AutoLFM3\UI\Textures\tabInactive">
+            <Texture file="Interface\AddOns\AutoLFM3\UI\Textures\Tabs\BottomTabInactive">
               <Anchors>
                 <Anchor point="TOPLEFT"/>
                 <Anchor point="BOTTOMRIGHT"/>
@@ -397,7 +397,7 @@
             </Texture>
           </Layer>
           <Layer level="BORDER">
-            <Texture name="$parent_Highlight" file="Interface\AddOns\AutoLFM3\UI\Textures\tabHighlight" hidden="true">
+            <Texture name="$parent_Highlight" file="Interface\AddOns\AutoLFM3\UI\Textures\Tabs\BottomTabHighlight" hidden="true">
               <Size>
                 <AbsDimension x="80" y="24"/>
               </Size>
@@ -441,7 +441,7 @@
         </Anchors>
         <Layers>
           <Layer level="BACKGROUND">
-            <Texture file="Interface\AddOns\AutoLFM3\UI\Textures\tabInactive">
+            <Texture file="Interface\AddOns\AutoLFM3\UI\Textures\Tabs\BottomTabInactive">
               <Anchors>
                 <Anchor point="TOPLEFT"/>
                 <Anchor point="BOTTOMRIGHT"/>
@@ -449,7 +449,7 @@
             </Texture>
           </Layer>
           <Layer level="BORDER">
-            <Texture name="$parent_Highlight" file="Interface\AddOns\AutoLFM3\UI\Textures\tabHighlight" hidden="true">
+            <Texture name="$parent_Highlight" file="Interface\AddOns\AutoLFM3\UI\Textures\Tabs\BottomTabHighlight" hidden="true">
               <Size>
                 <AbsDimension x="80" y="24"/>
               </Size>
@@ -493,7 +493,7 @@
         </Anchors>
         <Layers>
           <Layer level="BACKGROUND">
-            <Texture file="Interface\AddOns\AutoLFM3\UI\Textures\tabInactive">
+            <Texture file="Interface\AddOns\AutoLFM3\UI\Textures\Tabs\BottomTabInactive">
               <Anchors>
                 <Anchor point="TOPLEFT"/>
                 <Anchor point="BOTTOMRIGHT"/>
@@ -501,7 +501,7 @@
             </Texture>
           </Layer>
           <Layer level="BORDER">
-            <Texture name="$parent_Highlight" file="Interface\AddOns\AutoLFM3\UI\Textures\tabHighlight" hidden="true">
+            <Texture name="$parent_Highlight" file="Interface\AddOns\AutoLFM3\UI\Textures\Tabs\BottomTabHighlight" hidden="true">
               <Size>
                 <AbsDimension x="80" y="24"/>
               </Size>
@@ -548,7 +548,7 @@
         </Anchors>
         <Layers>
           <Layer level="BACKGROUND">
-            <Texture file="Interface\AddOns\AutoLFM3\UI\Textures\lineTab">
+            <Texture file="Interface\AddOns\AutoLFM3\UI\Textures\Tabs\LineTab">
               <Size>
                 <AbsDimension x="64" y="64"/>
               </Size>
@@ -562,7 +562,7 @@
             </Texture>
           </Layer>
           <Layer level="OVERLAY">
-            <Texture name="$parent_Icon" file="Interface\AddOns\AutoLFM3\UI\Textures\clearAll">
+            <Texture name="$parent_Icon" file="Interface\AddOns\AutoLFM3\UI\Textures\Tabs\ClearAll">
               <Size>
                 <AbsDimension x="32" y="32"/>
               </Size>
@@ -572,13 +572,13 @@
             </Texture>
           </Layer>
           <Layer level="HIGHLIGHT">
-            <Texture name="$parent_Highlight" file="Interface\AddOns\AutoLFM3\UI\Textures\lineTabHilight" alphaMode="ADD">
+            <Texture name="$parent_Highlight" file="Interface\AddOns\AutoLFM3\UI\Textures\Tabs\LineTabHighlight" alphaMode="ADD">
               <Anchors>
                 <Anchor point="TOPLEFT"/>
                 <Anchor point="BOTTOMRIGHT"/>
               </Anchors>
             </Texture>
-            <Texture name="$parent_Click" file="Interface\AddOns\AutoLFM3\UI\Textures\lineTabClick" hidden="true">
+            <Texture name="$parent_Click" file="Interface\AddOns\AutoLFM3\UI\Textures\Tabs\LineTabClick" hidden="true">
               <Anchors>
                 <Anchor point="TOPLEFT"/>
                 <Anchor point="BOTTOMRIGHT"/>
@@ -588,11 +588,8 @@
         </Layers>
         <NormalTexture/>
         <Scripts>
-          <OnLoad>
-            AutoLFM.Logic.MainFrame.UpdateClearAllButton()
-          </OnLoad>
           <OnClick>
-            AutoLFM.Logic.MainFrame.ClearAll()
+            AutoLFM.Core.Maestro.Dispatch("selection.clear_all")
           </OnClick>
           <OnMouseDown>
             if this:IsEnabled() then
@@ -630,7 +627,7 @@
         </Anchors>
         <Layers>
           <Layer level="BACKGROUND">
-            <Texture file="Interface\AddOns\AutoLFM3\UI\Textures\lineTab">
+            <Texture file="Interface\AddOns\AutoLFM3\UI\Textures\Tabs\LineTab">
               <Size>
                 <AbsDimension x="64" y="64"/>
               </Size>
@@ -644,7 +641,7 @@
             </Texture>
           </Layer>
           <Layer level="BORDER">
-            <Texture file="Interface\AddOns\AutoLFM3\UI\Textures\presets">
+            <Texture file="Interface\AddOns\AutoLFM3\UI\Textures\Tabs\Presets">
               <Size>
                 <AbsDimension x="32" y="32"/>
               </Size>
@@ -654,7 +651,7 @@
             </Texture>
           </Layer>
           <Layer level="HIGHLIGHT">
-            <Texture name="$parent_Highlight" file="Interface\AddOns\AutoLFM3\UI\Textures\lineTabHilight" alphaMode="ADD">
+            <Texture name="$parent_Highlight" file="Interface\AddOns\AutoLFM3\UI\Textures\Tabs\LineTabHighlight" alphaMode="ADD">
               <Anchors>
                 <Anchor point="TOPLEFT"/>
                 <Anchor point="BOTTOMRIGHT"/>
@@ -663,8 +660,8 @@
           </Layer>
         </Layers>
         <NormalTexture/>
-        <PushedTexture file="Interface\AddOns\AutoLFM3\UI\Textures\lineTabClick"/>
-        <CheckedTexture file="Interface\AddOns\AutoLFM3\UI\Textures\lineTabCheck" alphaMode="ADD"/>
+        <PushedTexture file="Interface\AddOns\AutoLFM3\UI\Textures\Tabs\LineTabClick"/>
+        <CheckedTexture file="Interface\AddOns\AutoLFM3\UI\Textures\Tabs\LineTabActive" alphaMode="ADD"/>
         <Scripts>
           <OnClick>
             AutoLFM.Logic.MainFrame.SelectLineTab(1)
@@ -695,7 +692,7 @@
         </Anchors>
         <Layers>
           <Layer level="BACKGROUND">
-            <Texture file="Interface\AddOns\AutoLFM3\UI\Textures\lineTab">
+            <Texture file="Interface\AddOns\AutoLFM3\UI\Textures\Tabs\LineTab">
               <Size>
                 <AbsDimension x="64" y="64"/>
               </Size>
@@ -709,7 +706,7 @@
             </Texture>
           </Layer>
           <Layer level="OVERLAY">
-            <Texture name="$parent_Icon" file="Interface\AddOns\AutoLFM3\UI\Textures\addPreset">
+            <Texture name="$parent_Icon" file="Interface\AddOns\AutoLFM3\UI\Textures\Tabs\AddPreset">
               <Size>
                 <AbsDimension x="32" y="32"/>
               </Size>
@@ -719,13 +716,13 @@
             </Texture>
           </Layer>
           <Layer level="HIGHLIGHT">
-            <Texture name="$parent_Highlight" file="Interface\AddOns\AutoLFM3\UI\Textures\lineTabHilight" alphaMode="ADD">
+            <Texture name="$parent_Highlight" file="Interface\AddOns\AutoLFM3\UI\Textures\Tabs\LineTabHighlight" alphaMode="ADD">
               <Anchors>
                 <Anchor point="TOPLEFT"/>
                 <Anchor point="BOTTOMRIGHT"/>
               </Anchors>
             </Texture>
-            <Texture name="$parent_Click" file="Interface\AddOns\AutoLFM3\UI\Textures\lineTabClick" hidden="true">
+            <Texture name="$parent_Click" file="Interface\AddOns\AutoLFM3\UI\Textures\Tabs\LineTabClick" hidden="true">
               <Anchors>
                 <Anchor point="TOPLEFT"/>
                 <Anchor point="BOTTOMRIGHT"/>
@@ -735,11 +732,8 @@
         </Layers>
         <NormalTexture/>
         <Scripts>
-          <OnLoad>
-            AutoLFM.Logic.MainFrame.UpdateAddPresetButton()
-          </OnLoad>
           <OnClick>
-            AutoLFM.UI.Content.Presets.ShowSavePopup()
+            AutoLFM.Core.Maestro.Dispatch("presets.save")
           </OnClick>
           <OnMouseDown>
             if this:IsEnabled() then
@@ -777,7 +771,7 @@
         </Anchors>
         <Layers>
           <Layer level="BACKGROUND">
-            <Texture file="Interface\AddOns\AutoLFM3\UI\Textures\lineTab">
+            <Texture file="Interface\AddOns\AutoLFM3\UI\Textures\Tabs\LineTab">
               <Size>
                 <AbsDimension x="64" y="64"/>
               </Size>
@@ -791,7 +785,7 @@
             </Texture>
           </Layer>
           <Layer level="BORDER">
-            <Texture file="Interface\AddOns\AutoLFM3\UI\Textures\autoInvite">
+            <Texture file="Interface\AddOns\AutoLFM3\UI\Textures\Tabs\AutoInvite">
               <Size>
                 <AbsDimension x="32" y="32"/>
               </Size>
@@ -801,7 +795,7 @@
             </Texture>
           </Layer>
           <Layer level="HIGHLIGHT">
-            <Texture name="$parent_Highlight" file="Interface\AddOns\AutoLFM3\UI\Textures\lineTabHilight" alphaMode="ADD">
+            <Texture name="$parent_Highlight" file="Interface\AddOns\AutoLFM3\UI\Textures\Tabs\LineTabHighlight" alphaMode="ADD">
               <Anchors>
                 <Anchor point="TOPLEFT"/>
                 <Anchor point="BOTTOMRIGHT"/>
@@ -810,8 +804,8 @@
           </Layer>
         </Layers>
         <NormalTexture/>
-        <PushedTexture file="Interface\AddOns\AutoLFM3\UI\Textures\lineTabClick"/>
-        <CheckedTexture file="Interface\AddOns\AutoLFM3\UI\Textures\lineTabCheck" alphaMode="ADD"/>
+        <PushedTexture file="Interface\AddOns\AutoLFM3\UI\Textures\Tabs\LineTabClick"/>
+        <CheckedTexture file="Interface\AddOns\AutoLFM3\UI\Textures\Tabs\LineTabActive" alphaMode="ADD"/>
         <Scripts>
           <OnClick>
             AutoLFM.Logic.MainFrame.SelectLineTab(5)
@@ -842,7 +836,7 @@
         </Anchors>
         <Layers>
           <Layer level="BACKGROUND">
-            <Texture file="Interface\AddOns\AutoLFM3\UI\Textures\lineTab">
+            <Texture file="Interface\AddOns\AutoLFM3\UI\Textures\Tabs\LineTab">
               <Size>
                 <AbsDimension x="64" y="64"/>
               </Size>
@@ -856,7 +850,7 @@
             </Texture>
           </Layer>
           <Layer level="BORDER">
-            <Texture file="Interface\AddOns\AutoLFM3\UI\Textures\options">
+            <Texture file="Interface\AddOns\AutoLFM3\UI\Textures\Tabs\Options">
               <Size>
                 <AbsDimension x="32" y="32"/>
               </Size>
@@ -866,7 +860,7 @@
             </Texture>
           </Layer>
           <Layer level="HIGHLIGHT">
-            <Texture name="$parent_Highlight" file="Interface\AddOns\AutoLFM3\UI\Textures\lineTabHilight" alphaMode="ADD">
+            <Texture name="$parent_Highlight" file="Interface\AddOns\AutoLFM3\UI\Textures\Tabs\LineTabHighlight" alphaMode="ADD">
               <Anchors>
                 <Anchor point="TOPLEFT"/>
                 <Anchor point="BOTTOMRIGHT"/>
@@ -875,8 +869,8 @@
           </Layer>
         </Layers>
         <NormalTexture/>
-        <PushedTexture file="Interface\AddOns\AutoLFM3\UI\Textures\lineTabClick"/>
-        <CheckedTexture file="Interface\AddOns\AutoLFM3\UI\Textures\lineTabCheck" alphaMode="ADD"/>
+        <PushedTexture file="Interface\AddOns\AutoLFM3\UI\Textures\Tabs\LineTabClick"/>
+        <CheckedTexture file="Interface\AddOns\AutoLFM3\UI\Textures\Tabs\LineTabActive" alphaMode="ADD"/>
         <Scripts>
           <OnClick>
             AutoLFM.Logic.MainFrame.SelectLineTab(4)
@@ -935,11 +929,11 @@
                 </Offset>
               </Anchor>
             </Anchors>
-            <NormalTexture file="Interface\AddOns\AutoLFM3\UI\Textures\preview"/>
-            <HighlightTexture file="Interface\AddOns\AutoLFM3\UI\Textures\preview" alphaMode="ADD"/>
+            <NormalTexture file="Interface\AddOns\AutoLFM3\UI\Textures\Preview"/>
+            <HighlightTexture file="Interface\AddOns\AutoLFM3\UI\Textures\Preview" alphaMode="ADD"/>
             <Scripts>
               <OnClick>
-                AutoLFM.Logic.MainFrame.ShowFullPreview()
+                AutoLFM.Core.Maestro.Dispatch("messages.preview")
               </OnClick>
               <OnEnter>
                 GameTooltip:SetOwner(this, "ANCHOR_NONE")
@@ -962,85 +956,94 @@
       <OnLoad>
         UIPanelWindows[this:GetName()] = { area = "left", pushable = 1 }
         tinsert(UISpecialFrames, this:GetName())
-        AutoLFM.Logic.MainFrame.OnLoad(this)
+        AutoLFM.UI.MainFrame.OnLoad(this)
       </OnLoad>
       <OnShow>
         PlaySound("GAMEDIALOGOPEN")
-        AutoLFM.Logic.MainFrame.OnShow(this)
+        AutoLFM.UI.MainFrame.OnShow(this)
       </OnShow>
       <OnHide>
         PlaySound("GAMEDIALOGCLOSE")
-        AutoLFM.Logic.MainFrame.OnHide(this)
+        AutoLFM.UI.MainFrame.OnHide(this)
       </OnHide>
     </Scripts>
   </Frame>
+
   <!--==========================================================================
     AutoLFM Minimap Button
-    ==========================================================================
-    Simple minimap button with drag support and tooltip
     ==========================================================================-->
-  <Button name="AutoLFM_MinimapButton" parent="Minimap" movable="true" toplevel="true" frameStrata="LOW" hidden="false">
+  <Button name="AutoLFM_MinimapButton" parent="Minimap" hidden="false" movable="true" frameStrata="MEDIUM">
     <Size>
-      <AbsDimension x="33" y="33"/>
+      <AbsDimension x="32" y="32" />
     </Size>
+
     <Anchors>
-      <Anchor point="LEFT">
+      <Anchor point="LEFT" relativePoint="LEFT" relativeTo="Minimap">
         <Offset>
-          <AbsDimension x="16" y="-68"/>
+          <AbsDimension x="16" y="-68" />
         </Offset>
       </Anchor>
     </Anchors>
+
     <Layers>
       <Layer level="BACKGROUND">
-        <Texture name="$parent_Icon" file="Interface\AddOns\AutoLFM3\UI\Textures\Eyes\eye01">
+        <Texture name="$parent_Icon" file="Interface\AddOns\AutoLFM3\UI\Textures\Eye\Eye00">
           <Size>
-            <AbsDimension x="36" y="36"/>
+            <AbsDimension x="36" y="36" />
           </Size>
           <Anchors>
             <Anchor point="TOPLEFT">
               <Offset>
-                <AbsDimension x="-3" y="3"/>
+                <AbsDimension x="-3" y="3" />
               </Offset>
             </Anchor>
           </Anchors>
-          <TexCoords left="0.05" right="0.95" top="0.05" bottom="0.95"/>
+          <TexCoords left="0.05" right="0.95" top="0.05" bottom="0.95" />
         </Texture>
       </Layer>
+
       <Layer level="OVERLAY">
         <Texture file="Interface\Minimap\MiniMap-TrackingBorder">
           <Size>
-            <AbsDimension x="52" y="52"/>
+            <AbsDimension x="52" y="52" />
           </Size>
           <Anchors>
-            <Anchor point="TOPLEFT"/>
+            <Anchor point="TOPLEFT" />
           </Anchors>
         </Texture>
       </Layer>
     </Layers>
-    <HighlightTexture alphaMode="ADD" file="Interface\Minimap\UI-Minimap-ZoomButton-Highlight"/>
+
+    <HighlightTexture file="Interface\Minimap\UI-Minimap-ZoomButton-Highlight" alphaMode="ADD" />
+
     <Scripts>
       <OnLoad>
         this:RegisterForClicks("LeftButtonUp", "RightButtonUp")
         this:RegisterForDrag("LeftButton")
         this:SetClampedToScreen(true)
       </OnLoad>
+
+      <OnClick>
+        AutoLFM.Components.MinimapButton.OnClick(this, arg1)
+      </OnClick>
+
       <OnDragStart>
         if IsControlKeyDown() then
           this:LockHighlight()
           this:StartMoving()
         end
       </OnDragStart>
+
       <OnDragStop>
         this:UnlockHighlight()
         this:StopMovingOrSizing()
         AutoLFM.Components.MinimapButton.OnDragStop(this)
       </OnDragStop>
-      <OnClick>
-        AutoLFM.Components.MinimapButton.OnClick(this, arg1)
-      </OnClick>
+
       <OnEnter>
         AutoLFM.Components.MinimapButton.OnEnter(this)
       </OnEnter>
+
       <OnLeave>
         GameTooltip:Hide()
       </OnLeave>
