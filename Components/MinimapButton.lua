@@ -154,9 +154,11 @@ function AutoLFM.Components.MinimapButton.RegisterCommands()
   if not AutoLFM.Core.Maestro then return end
 
   -- Reset minimap button position to default
-  AutoLFM.Core.Maestro.RegisterCommand("Minimap.ResetPosition", function()
-    AutoLFM.Components.MinimapButton.ResetPosition()
-  end, {
+  AutoLFM.Core.Maestro.RegisterCommand({
+    key = "Minimap.ResetPosition",
+    handler = function()
+      AutoLFM.Components.MinimapButton.ResetPosition()
+    end,
     description = "Reset minimap button position to default"
   })
 end

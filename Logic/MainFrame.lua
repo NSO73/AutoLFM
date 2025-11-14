@@ -98,8 +98,8 @@ function AutoLFM.Logic.MainFrame.SelectBottomTab(tabId)
     local contentName = BOTTOM_TAB_CONTENT[tabId]
     AutoLFM.Logic.MainFrame.ShowContent(contentName)
 
-    -- Dispatch event
-    AutoLFM.Core.Maestro.Dispatch("UI.BottomTab.Selected", tabId, contentName)
+    -- Emit event
+    AutoLFM.Core.Maestro.Emit("UI.BottomTab.Selected", tabId, contentName)
 end
 
 -----------------------------------------------------------------------------
@@ -222,16 +222,16 @@ end
 -- Refresh Current Content
 -----------------------------------------------------------------------------
 function AutoLFM.Logic.MainFrame.RefreshCurrentContent()
-    -- Dispatch refresh for current content
+    -- Emit refresh for current content
     if currentLineTab > 0 then
         local contentName = LINE_TAB_CONTENT[currentLineTab]
         if contentName then
-            AutoLFM.Core.Maestro.Dispatch("UI.Content.Refresh", contentName)
+            AutoLFM.Core.Maestro.Emit("UI.Content.Refresh", contentName)
         end
     else
         local contentName = BOTTOM_TAB_CONTENT[currentBottomTab]
         if contentName then
-            AutoLFM.Core.Maestro.Dispatch("UI.Content.Refresh", contentName)
+            AutoLFM.Core.Maestro.Emit("UI.Content.Refresh", contentName)
         end
     end
 end
@@ -402,13 +402,13 @@ function MainFrameUI.OnShow(frame)
     -- Refresh current content
     AutoLFM.Logic.MainFrame.RefreshCurrentContent()
 
-    -- Dispatch show event
-    AutoLFM.Core.Maestro.Dispatch("UI.MainFrame.Shown")
+    -- Emit show event
+    AutoLFM.Core.Maestro.Emit("UI.MainFrame.Shown")
 end
 
 function MainFrameUI.OnHide(frame)
-    -- Dispatch hide event
-    AutoLFM.Core.Maestro.Dispatch("UI.MainFrame.Hidden")
+    -- Emit hide event
+    AutoLFM.Core.Maestro.Emit("UI.MainFrame.Hidden")
 end
 
 --=============================================================================

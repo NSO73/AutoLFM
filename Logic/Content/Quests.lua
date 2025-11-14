@@ -5,6 +5,7 @@
 
 AutoLFM = AutoLFM or {}
 AutoLFM.Logic = AutoLFM.Logic or {}
+AutoLFM.Logic.Content = AutoLFM.Logic.Content or {}
 AutoLFM.Logic.Content.Quests = AutoLFM.Logic.Content.Quests or {}
 
 --=============================================================================
@@ -203,8 +204,7 @@ end
 function AutoLFM.Logic.Content.Quests.RegisterCommands()
     -- Select quest command
     AutoLFM.Core.Maestro.RegisterCommand({
-        id = "Quests.Select",
-        name = "Select Quest",
+        key = "Quests.Select",
         description = "Selects a quest and adds its link to the broadcast message",
         handler = function(questIndex)
             if not questIndex then return end
@@ -223,8 +223,7 @@ function AutoLFM.Logic.Content.Quests.RegisterCommands()
 
     -- Deselect quest command
     AutoLFM.Core.Maestro.RegisterCommand({
-        id = "quests.deselect",
-        name = "Deselect Quest",
+        key = "Quests.Deselect",
         description = "Deselects a quest and removes its link from the broadcast message",
         handler = function(questIndex)
             if not questIndex then return end
@@ -243,8 +242,7 @@ function AutoLFM.Logic.Content.Quests.RegisterCommands()
 
     -- Deselect all quests command (optimized for bulk operations)
     AutoLFM.Core.Maestro.RegisterCommand({
-        id = "Quests.DeselectAll",
-        name = "Deselect All Quests",
+        key = "Quests.DeselectAll",
         description = "Deselects all quests at once",
         handler = function()
             -- Clear local state directly (no individual deselect events)
@@ -406,13 +404,19 @@ AutoLFM.Core.Maestro.On("Quest.StateChanged", function()
     if uiFrame and uiFrame:IsVisible() then
         QuestsUI.Refresh()
     end
-end)
+end, {
+    key = "QuestsUI.RefreshOnStateChange",
+    description = "Refreshes quests UI when state changes"
+})
 
 AutoLFM.Core.Maestro.On("QuestLog.Updated", function()
     if uiFrame and uiFrame:IsVisible() then
         QuestsUI.Refresh()
     end
-end)
+end, {
+    key = "QuestsUI.RefreshOnLogUpdate",
+    description = "Refreshes quests UI when quest log updates"
+})
 
 --=============================================================================
 -- INITIALIZATION

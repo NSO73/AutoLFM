@@ -5,6 +5,7 @@
 
 AutoLFM = AutoLFM or {}
 AutoLFM.Logic = AutoLFM.Logic or {}
+AutoLFM.Logic.Content = AutoLFM.Logic.Content or {}
 AutoLFM.Logic.Content.Options = AutoLFM.Logic.Content.Options or {}
 
 --=============================================================================
@@ -143,8 +144,7 @@ end
 function AutoLFM.Logic.Content.Options.RegisterCommands()
     -- Set minimap visible command
     AutoLFM.Core.Maestro.RegisterCommand({
-        id = "options.set_minimap_visible",
-        name = "Set Minimap Visible",
+        key = "Options.SetMinimapVisible",
         description = "Set minimap button visibility",
         handler = function(isVisible)
             if isVisible == nil then return end
@@ -167,8 +167,7 @@ function AutoLFM.Logic.Content.Options.RegisterCommands()
 
     -- Set dark mode command
     AutoLFM.Core.Maestro.RegisterCommand({
-        id = "options.set_dark_mode",
-        name = "Set Dark Mode",
+        key = "Options.SetDarkMode",
         description = "Enable or disable dark mode",
         handler = function(isEnabled)
             if isEnabled == nil then return end
@@ -190,8 +189,7 @@ function AutoLFM.Logic.Content.Options.RegisterCommands()
 
     -- Set presets condensed view command
     AutoLFM.Core.Maestro.RegisterCommand({
-        id = "options.set_presets_condensed",
-        name = "Set Presets Condensed",
+        key = "Options.SetPresetsCondensed",
         description = "Enable or disable condensed presets view",
         handler = function(isEnabled)
             if isEnabled == nil then return end
@@ -211,8 +209,7 @@ function AutoLFM.Logic.Content.Options.RegisterCommands()
 
     -- Set test mode command
     AutoLFM.Core.Maestro.RegisterCommand({
-        id = "options.set_test_mode",
-        name = "Set Test Mode",
+        key = "Options.SetTestMode",
         description = "Enable or disable test/dry-run mode",
         handler = function(isEnabled)
             if isEnabled == nil then return end
@@ -232,8 +229,7 @@ function AutoLFM.Logic.Content.Options.RegisterCommands()
 
     -- Set debug mode command
     AutoLFM.Core.Maestro.RegisterCommand({
-        id = "options.set_debug_mode",
-        name = "Set Debug Mode",
+        key = "Options.SetDebugMode",
         description = "Enable or disable debug mode (session-only)",
         handler = function(isEnabled)
             if isEnabled == nil then return end
@@ -256,8 +252,7 @@ function AutoLFM.Logic.Content.Options.RegisterCommands()
 
     -- Set default panel command
     AutoLFM.Core.Maestro.RegisterCommand({
-        id = "options.set_default_panel",
-        name = "Set Default Panel",
+        key = "Options.SetDefaultPanel",
         description = "Set the default panel to open (dungeons, raids, quests, broadcasts, presets, options)",
         handler = function(panelName)
             if not panelName then return end
@@ -274,8 +269,7 @@ function AutoLFM.Logic.Content.Options.RegisterCommands()
 
     -- Toggle dungeon filter command
     AutoLFM.Core.Maestro.RegisterCommand({
-        id = "options.toggle_dungeon_filter",
-        name = "Toggle Dungeon Filter",
+        key = "Options.ToggleDungeonFilter",
         description = "Toggle dungeon filter by color ID",
         handler = function(colorId)
             if not colorId then return end
@@ -294,8 +288,7 @@ function AutoLFM.Logic.Content.Options.RegisterCommands()
 
     -- Reset all dungeon filters command
     AutoLFM.Core.Maestro.RegisterCommand({
-        id = "options.reset_all_filters",
-        name = "Reset All Dungeon Filters",
+        key = "Options.ResetAllFilters",
         description = "Reset all dungeon filters to default state",
         handler = function()
             -- Reset all filters to enabled (default state)
@@ -391,7 +384,10 @@ AutoLFM.Core.Maestro.On("Options.Changed", function()
     if uiFrame and uiFrame:IsVisible() then
         OptionsUI.Refresh()
     end
-end)
+end, {
+    key = "OptionsUI.Refresh",
+    description = "Refreshes options UI when settings change"
+})
 
 --=============================================================================
 -- INITIALIZATION

@@ -11,6 +11,7 @@
 #=============================================================================
 Core\Commands.lua
 Core\Constants.lua
+Core\Events.lua
 Core\Init.lua
 Core\Maestro.lua
 Core\Persistent.lua
@@ -54,5 +55,4 @@ Components\WelcomePopup.lua
 # Debug
 #=============================================================================
 Debug\DebugWindow.lua
-Debug\EventMonitor.lua
 Debug\GroupTest.lua

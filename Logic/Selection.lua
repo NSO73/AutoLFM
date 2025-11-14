@@ -318,8 +318,7 @@ end
 function AutoLFM.Logic.Selection.RegisterCommands()
     -- Clear all command
     AutoLFM.Core.Maestro.RegisterCommand({
-        id = "Selection.ClearAll",
-        name = "Clear All Selections",
+        key = "Selection.ClearAll",
         description = "Clears all selections (dungeons, raids, quests, roles, message)",
         handler = function()
             AutoLFM.Logic.Selection.ClearAll()

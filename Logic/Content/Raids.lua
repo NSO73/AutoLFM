@@ -5,6 +5,7 @@
 
 AutoLFM = AutoLFM or {}
 AutoLFM.Logic = AutoLFM.Logic or {}
+AutoLFM.Logic.Content = AutoLFM.Logic.Content or {}
 AutoLFM.Logic.Content.Raids = AutoLFM.Logic.Content.Raids or {}
 
 --=============================================================================
@@ -83,8 +84,7 @@ end
 function AutoLFM.Logic.Content.Raids.RegisterCommands()
     -- Select raid command
     AutoLFM.Core.Maestro.RegisterCommand({
-        id = "raids.select",
-        name = "Select Raid",
+        key = "Raids.Select",
         description = "Selects a raid (only one raid can be selected at a time)",
         handler = function(raidIndex)
             if not raidIndex then return end
@@ -110,8 +110,7 @@ function AutoLFM.Logic.Content.Raids.RegisterCommands()
 
     -- Deselect raid command
     AutoLFM.Core.Maestro.RegisterCommand({
-        id = "Raids.Deselect",
-        name = "Deselect Raid",
+        key = "Raids.Deselect",
         description = "Deselects a raid",
         handler = function(raidIndex)
             if not raidIndex then return end
@@ -129,8 +128,7 @@ function AutoLFM.Logic.Content.Raids.RegisterCommands()
 
     -- Set raid size command
     AutoLFM.Core.Maestro.RegisterCommand({
-        id = "raids.set_size",
-        name = "Set Raid Size",
+        key = "Raids.SetSize",
         description = "Sets the target size for a variable-size raid",
         handler = function(raidIndex, size)
             if not raidIndex then return end
@@ -149,8 +147,7 @@ function AutoLFM.Logic.Content.Raids.RegisterCommands()
 
     -- Deselect all raids command (optimized for bulk operations)
     AutoLFM.Core.Maestro.RegisterCommand({
-        id = "Raids.DeselectAll",
-        name = "Deselect All Raids",
+        key = "Raids.DeselectAll",
         description = "Deselects all raids at once",
         handler = function()
             -- Clear local state directly (no individual deselect events)
@@ -340,7 +337,10 @@ AutoLFM.Core.Maestro.On("Raid.StateChanged", function()
     if uiFrame and uiFrame:IsVisible() then
         RaidsUI.Refresh()
     end
-end)
+end, {
+    key = "RaidsUI.Refresh",
+    description = "Refreshes raids UI when state changes"
+})
 
 --=============================================================================
 -- INITIALIZATION

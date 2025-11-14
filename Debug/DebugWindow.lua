@@ -1,12 +1,10 @@
 --=============================================================================
 -- AutoLFM: Debug Window
---   Real-time debug console with action logging and copy functionality
+--   Real-time debug console with event monitoring and introspection
 --=============================================================================
 AutoLFM = AutoLFM or {}
 AutoLFM.Debug = AutoLFM.Debug or {}
 AutoLFM.Debug.DebugWindow = AutoLFM.Debug.DebugWindow or {}
-
-local M = AutoLFM.Debug.DebugWindow
 
 --=============================================================================
 -- Private State
@@ -15,6 +13,10 @@ local debugFrame = nil
 local logBuffer = {}
 local maxLogLines = 500
 local isEnabled = false
+
+-- Event monitoring state
+local isMonitoring = false
+local registeredListeners = {}
 
 --=============================================================================
 -- Color Codes
@@ -66,11 +68,18 @@ local function UpdateDisplay()
 
   -- Calculate height based on number of lines (approximate)
   local lineCount = table.getn(logBuffer)
-  local lineHeight = 14 -- Approximate height per line
-  local calculatedHeight = lineCount * lineHeight
-  local minHeight = scrollFrame:GetHeight()
+  if lineCount == 0 then lineCount = 1 end
 
-  editBox:SetHeight(math.max(calculatedHeight, minHeight))
+  local lineHeight = 14 -- Approximate height per line
+  local calculatedHeight = (lineCount * lineHeight) + 10 -- Small margin for safety
+
+  -- Set height to calculated height (allow it to grow beyond visible area)
+  editBox:SetHeight(calculatedHeight)
+
+  -- Update scroll child rect to recalculate scrollable area
+  if scrollFrame then
+    scrollFrame:UpdateScrollChildRect()
+  end
 
   if scrollFrame and scrollFrame.ScrollToBottom then
     scrollFrame:ScrollToBottom()
@@ -80,7 +89,7 @@ end
 --=============================================================================
 -- Public Logging API
 --=============================================================================
-function M.LogEvent(eventName, ...)
+function AutoLFM.Debug.DebugWindow.LogEvent(eventName, ...)
   local argsStr = ""
 
   if arg.n > 0 then
@@ -100,7 +109,7 @@ function M.LogEvent(eventName, ...)
   end
 end
 
-function M.LogCommand(commandName, ...)
+function AutoLFM.Debug.DebugWindow.LogCommand(commandName, ...)
   local argsStr = ""
 
   if arg.n > 0 then
@@ -120,7 +129,7 @@ function M.LogCommand(commandName, ...)
   end
 end
 
-function M.LogError(message)
+function AutoLFM.Debug.DebugWindow.LogError(message)
   if not message then return end
 
   local line = FormatLogLine("ERROR", message)
@@ -131,7 +140,7 @@ function M.LogError(message)
   end
 end
 
-function M.LogWarning(message)
+function AutoLFM.Debug.DebugWindow.LogWarning(message)
   if not message then return end
 
   local line = FormatLogLine("WARNING", message)
@@ -142,7 +151,7 @@ function M.LogWarning(message)
   end
 end
 
-function M.LogInfo(message)
+function AutoLFM.Debug.DebugWindow.LogInfo(message)
   if not message then return end
 
   local line = FormatLogLine("INFO", message)
@@ -153,7 +162,7 @@ function M.LogInfo(message)
   end
 end
 
-function M.LogAction(message)
+function AutoLFM.Debug.DebugWindow.LogAction(message)
   if not message then return end
 
   local line = FormatLogLine("ACTION", message)
@@ -164,7 +173,7 @@ function M.LogAction(message)
   end
 end
 
-function M.LogListener(message)
+function AutoLFM.Debug.DebugWindow.LogListener(message)
   if not message then return end
 
   -- Silent logging for listener operations (no category, just gray timestamp and message)
@@ -180,9 +189,9 @@ end
 --=============================================================================
 -- Window Management
 --=============================================================================
-function M.Show()
+function AutoLFM.Debug.DebugWindow.Show()
   if not debugFrame then
-    M.CreateFrame()
+    AutoLFM.Debug.DebugWindow.CreateFrame()
   end
 
   if debugFrame then
@@ -193,39 +202,52 @@ function M.Show()
   -- Update display with all buffered logs
   UpdateDisplay()
 
-  M.LogInfo("Debug window opened")
+  AutoLFM.Debug.DebugWindow.LogInfo("Debug window opened")
+
+  -- Automatically start event monitoring when debug window opens
+  AutoLFM.Debug.DebugWindow.StartMonitoring()
 end
 
-function M.Hide()
+function AutoLFM.Debug.DebugWindow.Hide()
   if debugFrame then
     debugFrame:Hide()
   end
 
   isEnabled = false
+
+  -- Automatically stop event monitoring when debug window closes
+  AutoLFM.Debug.DebugWindow.StopMonitoring()
 end
 
-function M.Toggle()
+function AutoLFM.Debug.DebugWindow.Toggle()
   if debugFrame and debugFrame:IsVisible() then
-    M.Hide()
+    AutoLFM.Debug.DebugWindow.Hide()
   else
-    M.Show()
+    AutoLFM.Debug.DebugWindow.Show()
   end
 end
 
-function M.IsVisible()
+function AutoLFM.Debug.DebugWindow.IsVisible()
   return debugFrame and debugFrame:IsVisible() or false
 end
 
-function M.Clear()
+function AutoLFM.Debug.DebugWindow.Clear()
   logBuffer = {}
   UpdateDisplay()
-  M.LogInfo("Debug log cleared")
+
+  -- Reset scroll position to top
+  local scrollBar = getglobal("AutoLFM_DebugWindow_ScrollFrameScrollBar")
+  if scrollBar then
+    scrollBar:SetValue(0)
+  end
+
+  AutoLFM.Debug.DebugWindow.LogInfo("Debug log cleared")
 end
 
 --=============================================================================
 -- Frame Creation
 --=============================================================================
-function M.CreateFrame()
+function AutoLFM.Debug.DebugWindow.CreateFrame()
   if debugFrame then return end
 
   -- Main Frame
@@ -255,7 +277,7 @@ function M.CreateFrame()
   local closeButton = CreateFrame("Button", nil, debugFrame, "UIPanelCloseButton")
   closeButton:SetPoint("TOPRIGHT", debugFrame, "TOPRIGHT", -5, -5)
   closeButton:SetScript("OnClick", function()
-    M.Hide()
+    AutoLFM.Debug.DebugWindow.Hide()
   end)
 
   -- Clear Button
@@ -265,7 +287,7 @@ function M.CreateFrame()
   clearButton:SetPoint("BOTTOMLEFT", debugFrame, "BOTTOMLEFT", 15, 15)
   clearButton:SetText("Clear")
   clearButton:SetScript("OnClick", function()
-    M.Clear()
+    AutoLFM.Debug.DebugWindow.Clear()
   end)
 
   -- Select All Button
@@ -289,13 +311,7 @@ function M.CreateFrame()
   eventsButton:SetPoint("LEFT", selectAllButton, "RIGHT", 5, 0)
   eventsButton:SetText("Events")
   eventsButton:SetScript("OnClick", function()
-    if AutoLFM.Debug and AutoLFM.Debug.PrintEventListeners then
-      AutoLFM.Debug.PrintEventListeners()
-    else
-      if AutoLFM.Core and AutoLFM.Core.Utils then
-        AutoLFM.Core.Utils.PrintError("Debug module not fully loaded")
-      end
-    end
+    AutoLFM.Debug.DebugWindow.PrintEventListeners()
   end)
 
   -- Commands Button
@@ -305,13 +321,7 @@ function M.CreateFrame()
   commandsButton:SetPoint("LEFT", eventsButton, "RIGHT", 5, 0)
   commandsButton:SetText("Commands")
   commandsButton:SetScript("OnClick", function()
-    if AutoLFM.Debug and AutoLFM.Debug.PrintCommands then
-      AutoLFM.Debug.PrintCommands()
-    else
-      if AutoLFM.Core and AutoLFM.Core.Utils then
-        AutoLFM.Core.Utils.PrintError("Debug module not fully loaded")
-      end
-    end
+    AutoLFM.Debug.DebugWindow.PrintCommands()
   end)
 
   -- Info Text
@@ -345,6 +355,9 @@ function M.CreateFrame()
 
   -- Helper function to scroll to bottom
   scrollFrame.ScrollToBottom = function()
+    -- Force update the scroll child rect first
+    scrollFrame:UpdateScrollChildRect()
+
     local scrollBar = getglobal("AutoLFM_DebugWindow_ScrollFrameScrollBar")
     if scrollBar and scrollBar.GetMaxValue then
       local maxValue = scrollBar:GetMaxValue()
@@ -353,6 +366,22 @@ function M.CreateFrame()
       end
     end
   end
+
+  -- Enable mouse wheel scrolling
+  scrollFrame:EnableMouseWheel(1)
+  scrollFrame:SetScript("OnMouseWheel", function()
+    local scrollBar = getglobal("AutoLFM_DebugWindow_ScrollFrameScrollBar")
+    if scrollBar then
+      local currentValue = scrollBar:GetValue()
+      local step = 20
+
+      if arg1 > 0 then
+        scrollBar:SetValue(currentValue - step)
+      else
+        scrollBar:SetValue(currentValue + step)
+      end
+    end
+  end)
 
   -- Make draggable
   debugFrame:SetScript("OnMouseDown", function()
@@ -378,8 +407,188 @@ function M.CreateFrame()
 end
 
 --=============================================================================
+-- Event Monitoring
+--=============================================================================
+function AutoLFM.Debug.DebugWindow.StartMonitoring()
+  if isMonitoring then
+    return
+  end
+
+  if not AutoLFM.Core then return end
+  if not AutoLFM.Core.Maestro then return end
+
+  -- Get all registered events dynamically
+  local allEvents = AutoLFM.Core.Maestro.GetAllEvents()
+  if not allEvents then
+    return
+  end
+
+  -- Subscribe to all events
+  for i = 1, table.getn(allEvents) do
+    local eventName = allEvents[i].key
+    local listener = function(...)
+      -- Log to debug window if available
+      if AutoLFM.Debug and AutoLFM.Debug.DebugWindow and AutoLFM.Debug.DebugWindow.LogEvent then
+        AutoLFM.Debug.DebugWindow.LogEvent(eventName, unpack(arg))
+      end
+    end
+
+    AutoLFM.Core.Maestro.On(eventName, listener, {
+      key = "EventMonitor." .. eventName,
+      description = "Event monitor listener for " .. eventName
+    })
+    table.insert(registeredListeners, {event = eventName, listener = listener})
+  end
+
+  isMonitoring = true
+end
+
+function AutoLFM.Debug.DebugWindow.StopMonitoring()
+  if not isMonitoring then
+    return
+  end
+
+  -- Note: We don't unregister listeners as they are harmless when the window is closed
+  -- They will simply not log anything since the window is hidden
+  isMonitoring = false
+end
+
+function AutoLFM.Debug.DebugWindow.IsMonitoring()
+  return isMonitoring
+end
+
+--=============================================================================
+-- Introspection Functions
+--=============================================================================
+
+-----------------------------------------------------------------------------
+-- Print registered events and listeners with details
+-----------------------------------------------------------------------------
+function AutoLFM.Debug.DebugWindow.PrintEventListeners()
+  if not AutoLFM.Core then return end
+  if not AutoLFM.Core.Maestro then return end
+
+  AutoLFM.Debug.DebugWindow.LogInfo("=== AutoLFM Event Listeners ===")
+  AutoLFM.Debug.DebugWindow.LogInfo(" ")
+
+  -- Get all events using introspection API
+  local allEvents = AutoLFM.Core.Maestro.GetAllEvents()
+
+  if not allEvents or table.getn(allEvents) == 0 then
+    AutoLFM.Debug.DebugWindow.LogInfo("No events registered")
+    return
+  end
+
+  local totalListeners = 0
+
+  -- Display each event with its listeners
+  for i = 1, table.getn(allEvents) do
+    local eventInfo = allEvents[i]
+    local listenerCount = eventInfo.listenerCount or 0
+
+    -- Get listeners and count non-EventMonitor ones
+    local listeners = nil
+    local appListenerCount = 0
+    if listenerCount > 0 then
+      listeners = AutoLFM.Core.Maestro.GetEventListeners(eventInfo.key)
+      for j = 1, table.getn(listeners) do
+        if not string.find(listeners[j].key, "^EventMonitor%.") then
+          appListenerCount = appListenerCount + 1
+        end
+      end
+    end
+
+    totalListeners = totalListeners + appListenerCount
+
+    -- Event header
+    local header = "[" .. eventInfo.id .. "] " .. eventInfo.key .. " (" .. appListenerCount .. " listener" .. (appListenerCount > 1 and "s" or "") .. ")"
+    AutoLFM.Debug.DebugWindow.LogInfo(header)
+
+    -- Show description if available
+    if eventInfo.description and eventInfo.description ~= "No description" then
+      AutoLFM.Debug.DebugWindow.LogInfo("  Description: " .. eventInfo.description)
+    end
+
+    -- Display listeners (excluding EventMonitor listeners)
+    if listeners and appListenerCount > 0 then
+      for j = 1, table.getn(listeners) do
+        local listener = listeners[j]
+
+        -- Skip EventMonitor listeners
+        if not string.find(listener.key, "^EventMonitor%.") then
+          local listenerInfo = "  [" .. listener.id .. "] " .. listener.key
+
+          if listener.description and listener.description ~= "No description" then
+            listenerInfo = listenerInfo .. " - " .. listener.description
+          end
+
+          AutoLFM.Debug.DebugWindow.LogInfo(listenerInfo)
+        end
+      end
+    end
+
+    AutoLFM.Debug.DebugWindow.LogInfo(" ")
+  end
+
+  local total = "Total: " .. table.getn(allEvents) .. " event" .. (table.getn(allEvents) > 1 and "s" or "") ..
+                ", " .. totalListeners .. " listener" .. (totalListeners > 1 and "s" or "")
+  AutoLFM.Debug.DebugWindow.LogInfo(total)
+end
+
+-----------------------------------------------------------------------------
+-- Print registered commands
+-----------------------------------------------------------------------------
+function AutoLFM.Debug.DebugWindow.PrintCommands()
+  if not AutoLFM.Core then return end
+  if not AutoLFM.Core.Maestro then return end
+
+  AutoLFM.Debug.DebugWindow.LogInfo("=== AutoLFM Commands ===")
+  AutoLFM.Debug.DebugWindow.LogInfo(" ")
+
+  -- Get all commands using introspection API
+  local allCommands = AutoLFM.Core.Maestro.GetAllCommands()
+
+  if not allCommands or table.getn(allCommands) == 0 then
+    AutoLFM.Debug.DebugWindow.LogInfo("No commands registered")
+    return
+  end
+
+  -- Already sorted by numeric ID from GetAllCommands()
+  -- Display each command with details
+  for i = 1, table.getn(allCommands) do
+    local cmd = allCommands[i]
+    local cmdInfo = "[" .. cmd.id .. "] " .. cmd.key
+
+    if cmd.description and cmd.description ~= "No description" then
+      cmdInfo = cmdInfo .. " - " .. cmd.description
+    end
+
+    AutoLFM.Debug.DebugWindow.LogInfo(cmdInfo)
+  end
+
+  AutoLFM.Debug.DebugWindow.LogInfo(" ")
+  local total = "Total: " .. table.getn(allCommands) .. " command" .. (table.getn(allCommands) > 1 and "s" or "")
+  AutoLFM.Debug.DebugWindow.LogInfo(total)
+end
+
+--=============================================================================
+-- Legacy API Compatibility (for external code that might reference EventMonitor)
+--=============================================================================
+AutoLFM.Debug.EventMonitor = {
+  Start = function() AutoLFM.Debug.DebugWindow.StartMonitoring() end,
+  Stop = function() AutoLFM.Debug.DebugWindow.StopMonitoring() end,
+  IsMonitoring = function() return AutoLFM.Debug.DebugWindow.IsMonitoring() end
+}
+
+-- Legacy functions for external references
+AutoLFM.Debug.MonitorAllEvents = function() AutoLFM.Debug.DebugWindow.StartMonitoring() end
+AutoLFM.Debug.StopMonitoring = function() AutoLFM.Debug.DebugWindow.StopMonitoring() end
+AutoLFM.Debug.PrintEventListeners = function() AutoLFM.Debug.DebugWindow.PrintEventListeners() end
+AutoLFM.Debug.PrintCommands = function() AutoLFM.Debug.DebugWindow.PrintCommands() end
+
+--=============================================================================
 -- Initialize (called automatically on load)
 --=============================================================================
-function M.Init()
+function AutoLFM.Debug.DebugWindow.Init()
   -- Nothing to do on init, window is created on demand
 end

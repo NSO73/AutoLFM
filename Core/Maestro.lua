@@ -56,8 +56,20 @@ end
 --   @param metadata table: { key, description, handler }
 -----------------------------------------------------------------------------
 local function RegisterCommandMetadata(metadata)
-    if not metadata or not metadata.key or not metadata.handler then
-        error("Maestro: RegisterCommandMetadata requires 'key' and 'handler'")
+    if not metadata then
+        error("Maestro: RegisterCommandMetadata received nil metadata")
+        return
+    end
+    if type(metadata) ~= "table" then
+        error("Maestro: RegisterCommandMetadata received non-table metadata (type: " .. type(metadata) .. ")")
+        return
+    end
+    if not metadata.key then
+        error("Maestro: RegisterCommandMetadata missing 'key' field")
+        return
+    end
+    if not metadata.handler then
+        error("Maestro: RegisterCommandMetadata missing 'handler' field for key: " .. tostring(metadata.key))
         return
     end
 
@@ -180,6 +192,11 @@ function AutoLFM.Core.Maestro.Dispatch(commandKey, ...)
 
     local commandMeta = AutoLFM.Core.Maestro.CommandRegistry[commandId]
 
+    -- Log to debug window if available
+    if AutoLFM.Debug and AutoLFM.Debug.DebugWindow and AutoLFM.Debug.DebugWindow.LogCommand then
+        AutoLFM.Debug.DebugWindow.LogCommand(commandKey, unpack(arg))
+    end
+
     -- Execute handler (Lua 5.0: arg table is available)
     local success, result = pcall(commandMeta.handler, unpack(arg))
 
@@ -204,6 +221,22 @@ end
 --=============================================================================
 -- EVENT BUS
 --=============================================================================
+
+-----------------------------------------------------------------------------
+-- Register Event (Public API)
+--   Pre-register an event with description before any listeners
+--   @param metadata table: { key, description }
+--
+--   Example:
+--   AutoLFM.Core.Maestro.RegisterEvent({
+--       key = "Dungeons.SelectionChanged",
+--       description = "Fired when dungeon selection changes"
+--   })
+-----------------------------------------------------------------------------
+function AutoLFM.Core.Maestro.RegisterEvent(metadata)
+    if not metadata then return end
+    RegisterEventMetadata(metadata)
+end
 
 -----------------------------------------------------------------------------
 -- Register Event Listener
@@ -349,16 +382,17 @@ end
 -----------------------------------------------------------------------------
 function AutoLFM.Core.Maestro.GetAllCommands()
     local commands = {}
-    for id, metadata in pairs(AutoLFM.Core.Maestro.CommandRegistry) do
+    for numericId, metadata in pairs(AutoLFM.Core.Maestro.CommandRegistry) do
         if metadata then
             table.insert(commands, {
-                id = id,
+                numericId = numericId,
+                id = metadata.id,
                 key = metadata.key,
                 description = metadata.description
             })
         end
     end
-    table.sort(commands, function(a, b) return a.id < b.id end)
+    table.sort(commands, function(a, b) return a.numericId < b.numericId end)
     return commands
 end
 
@@ -368,17 +402,18 @@ end
 -----------------------------------------------------------------------------
 function AutoLFM.Core.Maestro.GetAllEvents()
     local events = {}
-    for id, metadata in pairs(AutoLFM.Core.Maestro.EventRegistry) do
+    for numericId, metadata in pairs(AutoLFM.Core.Maestro.EventRegistry) do
         if metadata then
             table.insert(events, {
-                id = id,
+                numericId = numericId,
+                id = metadata.id,
                 key = metadata.key,
                 description = metadata.description,
                 listenerCount = (metadata.listeners and table.getn(metadata.listeners)) or 0
             })
         end
     end
-    table.sort(events, function(a, b) return a.id < b.id end)
+    table.sort(events, function(a, b) return a.numericId < b.numericId end)
     return events
 end
 

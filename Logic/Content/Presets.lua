@@ -5,6 +5,7 @@
 
 AutoLFM = AutoLFM or {}
 AutoLFM.Logic = AutoLFM.Logic or {}
+AutoLFM.Logic.Content = AutoLFM.Logic.Content or {}
 AutoLFM.Logic.Content.Presets = AutoLFM.Logic.Content.Presets or {}
 
 --=============================================================================
@@ -219,8 +220,7 @@ end
 function AutoLFM.Logic.Content.Presets.RegisterCommands()
     -- Save Preset Command
     AutoLFM.Core.Maestro.RegisterCommand({
-        id = "presets.save",
-        name = "Save Preset",
+        key = "Presets.Save",
         description = "Save current selections and settings as a preset",
         handler = function(presetName)
             if not presetName or presetName == "" then
@@ -259,8 +259,7 @@ function AutoLFM.Logic.Content.Presets.RegisterCommands()
 
     -- Load Preset Command
     AutoLFM.Core.Maestro.RegisterCommand({
-        id = "presets.load",
-        name = "Load Preset",
+        key = "Presets.Load",
         description = "Load a preset and restore its selections and settings",
         handler = function(presetName)
             if not presetName or presetName == "" then
@@ -288,8 +287,7 @@ function AutoLFM.Logic.Content.Presets.RegisterCommands()
 
     -- Delete Preset Command
     AutoLFM.Core.Maestro.RegisterCommand({
-        id = "presets.delete",
-        name = "Delete Preset",
+        key = "Presets.Delete",
         description = "Delete a preset",
         handler = function(presetName)
             if not presetName or presetName == "" then
@@ -319,8 +317,7 @@ function AutoLFM.Logic.Content.Presets.RegisterCommands()
 
     -- Move Preset Up Command
     AutoLFM.Core.Maestro.RegisterCommand({
-        id = "presets.move_up",
-        name = "Move Preset Up",
+        key = "Presets.MoveUp",
         description = "Move a preset up in the list",
         handler = function(presetName)
             if not presetName or presetName == "" then return end
@@ -344,8 +341,7 @@ function AutoLFM.Logic.Content.Presets.RegisterCommands()
 
     -- Move Preset Down Command
     AutoLFM.Core.Maestro.RegisterCommand({
-        id = "presets.move_down",
-        name = "Move Preset Down",
+        key = "Presets.MoveDown",
         description = "Move a preset down in the list",
         handler = function(presetName)
             if not presetName or presetName == "" then return end
@@ -519,19 +515,28 @@ AutoLFM.Core.Maestro.On("Preset.Changed", function()
     if uiFrame and uiFrame:IsVisible() then
         PresetsUI.Refresh()
     end
-end)
+end, {
+    key = "PresetsUI.RefreshOnChange",
+    description = "Refreshes presets UI when preset changes"
+})
 
 AutoLFM.Core.Maestro.On("Preset.Loaded", function()
     if uiFrame and uiFrame:IsVisible() then
         PresetsUI.Refresh()
     end
-end)
+end, {
+    key = "PresetsUI.RefreshOnLoad",
+    description = "Refreshes presets UI when preset is loaded"
+})
 
 AutoLFM.Core.Maestro.On("Preset.Deleted", function()
     if uiFrame and uiFrame:IsVisible() then
         PresetsUI.Refresh()
     end
-end)
+end, {
+    key = "PresetsUI.RefreshOnDelete",
+    description = "Refreshes presets UI when preset is deleted"
+})
 
 --=============================================================================
 -- INITIALIZATION

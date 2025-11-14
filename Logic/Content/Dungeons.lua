@@ -5,6 +5,7 @@
 
 AutoLFM = AutoLFM or {}
 AutoLFM.Logic = AutoLFM.Logic or {}
+AutoLFM.Logic.Content = AutoLFM.Logic.Content or {}
 AutoLFM.Logic.Content.Dungeons = AutoLFM.Logic.Content.Dungeons or {}
 
 --=============================================================================
@@ -113,8 +114,7 @@ end
 function AutoLFM.Logic.Content.Dungeons.RegisterCommands()
     -- Select dungeon command
     AutoLFM.Core.Maestro.RegisterCommand({
-        id = "Dungeons.Select",
-        name = "Select Dungeon",
+        key = "Dungeons.Select",
         description = "Selects a dungeon and applies selection constraints",
         handler = function(dungeonIndex)
             if not dungeonIndex then return end
@@ -132,8 +132,7 @@ function AutoLFM.Logic.Content.Dungeons.RegisterCommands()
 
     -- Deselect dungeon command
     AutoLFM.Core.Maestro.RegisterCommand({
-        id = "Dungeons.Deselect",
-        name = "Deselect Dungeon",
+        key = "Dungeons.Deselect",
         description = "Deselects a dungeon",
         handler = function(dungeonIndex)
             if not dungeonIndex then return end
@@ -151,8 +150,7 @@ function AutoLFM.Logic.Content.Dungeons.RegisterCommands()
 
     -- Deselect all dungeons command (optimized for bulk operations)
     AutoLFM.Core.Maestro.RegisterCommand({
-        id = "Dungeons.DeselectAll",
-        name = "Deselect All Dungeons",
+        key = "Dungeons.DeselectAll",
         description = "Deselects all dungeons at once",
         handler = function()
             -- Clear local state directly (no individual deselect events)
@@ -334,7 +332,10 @@ AutoLFM.Core.Maestro.On("Dungeons.StateChanged", function()
     if uiFrame and uiFrame:IsVisible() then
         DungeonsUI.Refresh()
     end
-end)
+end, {
+    key = "DungeonsUI.Refresh",
+    description = "Refreshes dungeons UI when state changes"
+})
 
 --=============================================================================
 -- INITIALIZATION

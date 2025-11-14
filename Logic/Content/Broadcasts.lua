@@ -5,6 +5,7 @@
 
 AutoLFM = AutoLFM or {}
 AutoLFM.Logic = AutoLFM.Logic or {}
+AutoLFM.Logic.Content = AutoLFM.Logic.Content or {}
 AutoLFM.Logic.Content.Broadcasts = AutoLFM.Logic.Content.Broadcasts or {}
 
 --=============================================================================
@@ -79,8 +80,7 @@ end
 function AutoLFM.Logic.Content.Broadcasts.RegisterCommands()
     -- Set custom message command
     AutoLFM.Core.Maestro.RegisterCommand({
-        id = "Broadcasts.SetCustomMessage",
-        name = "Set Custom Message",
+        key = "Broadcasts.SetCustomMessage",
         description = "Sets the custom broadcast message",
         handler = function(message)
             customBroadcastMessage = message or ""
@@ -90,8 +90,7 @@ function AutoLFM.Logic.Content.Broadcasts.RegisterCommands()
 
     -- Set interval command (write-through to Persistent)
     AutoLFM.Core.Maestro.RegisterCommand({
-        id = "Broadcasts.SetInterval",
-        name = "Set Broadcast Interval",
+        key = "Broadcasts.SetInterval",
         description = "Sets the broadcast interval in seconds",
         handler = function(interval)
             if not interval then return end
@@ -104,8 +103,7 @@ function AutoLFM.Logic.Content.Broadcasts.RegisterCommands()
 
     -- Toggle channel command (write-through to Persistent)
     AutoLFM.Core.Maestro.RegisterCommand({
-        id = "broadcasts.toggle_channel",
-        name = "Toggle Broadcast Channel",
+        key = "Broadcasts.ToggleChannel",
         description = "Toggles a broadcast channel on or off",
         handler = function(channelName, isChecked)
             if not channelName then return end
@@ -142,7 +140,7 @@ function AutoLFM.Logic.Content.Broadcasts.RegisterEventListeners()
             AutoLFM.Debug.DebugWindow.LogInfo("Message sent - Total: " .. tostring(messageCount))
         end
     end, {
-        name = "Log Broadcast Statistics",
+        key = "Broadcasts.LogStats",
         description = "Logs broadcast statistics when message is sent"
     })
 
@@ -154,7 +152,7 @@ function AutoLFM.Logic.Content.Broadcasts.RegisterEventListeners()
             AutoLFM.Debug.DebugWindow.LogInfo("Group is full - Broadcast stopped and selections cleared")
         end
     end, {
-        name = "Log Group Full",
+        key = "Broadcasts.LogGroupFull",
         description = "Logs when group is full and broadcast stops"
     })
 end

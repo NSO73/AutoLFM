@@ -6,8 +6,6 @@ AutoLFM = AutoLFM or {}
 AutoLFM.Debug = AutoLFM.Debug or {}
 AutoLFM.Debug.GroupTest = AutoLFM.Debug.GroupTest or {}
 
-local M = AutoLFM.Debug.GroupTest
-
 --=============================================================================
 -- Private State
 --=============================================================================
@@ -64,7 +62,7 @@ end
 --=============================================================================
 -- Public API
 --=============================================================================
-function M.SetGroupSize(size)
+function AutoLFM.Debug.GroupTest.SetGroupSize(size)
   if not size or size < 1 then
     if AutoLFM.Core and AutoLFM.Core.Utils then
       AutoLFM.Core.Utils.PrintError("Group size must be at least 1")
@@ -119,7 +117,7 @@ function M.SetGroupSize(size)
   end
 end
 
-function M.Reset()
+function AutoLFM.Debug.GroupTest.Reset()
   RestoreGroupFunctions()
   if AutoLFM.Core and AutoLFM.Core.Utils then
     AutoLFM.Core.Utils.PrintSuccess("Test mode disabled - using real group data")
@@ -147,11 +145,11 @@ function M.Reset()
   end
 end
 
-function M.IsActive()
+function AutoLFM.Debug.GroupTest.IsActive()
   return isTestMode
 end
 
-function M.GetTestSize()
+function AutoLFM.Debug.GroupTest.GetTestSize()
   if not isTestMode then return nil end
 
   if testRaidSize > 0 then
@@ -161,7 +159,7 @@ function M.GetTestSize()
   return testPartySize + 1
 end
 
-function M.SimulateFull()
+function AutoLFM.Debug.GroupTest.SimulateFull()
   if not AutoLFM.Logic then return end
   if not AutoLFM.Logic.Content then return end
 
@@ -184,13 +182,13 @@ function M.SimulateFull()
       raidSize = AutoLFM.Logic.Content.Raids.GetRaidSize(raid.index) or raid.sizeMin or raidSize
     end
 
-    M.SetGroupSize(raidSize)
+    AutoLFM.Debug.GroupTest.SetGroupSize(raidSize)
     if AutoLFM.Core and AutoLFM.Core.Utils then
       AutoLFM.Core.Utils.PrintInfo("Simulating full raid: " .. raidSize .. "/" .. raidSize)
     end
   elseif table.getn(selectedDungeons) > 0 then
     local dungeonSize = AutoLFM.Core.Constants.GROUP_SIZE_DUNGEON or 5
-    M.SetGroupSize(dungeonSize)
+    AutoLFM.Debug.GroupTest.SetGroupSize(dungeonSize)
     if AutoLFM.Core and AutoLFM.Core.Utils then
       AutoLFM.Core.Utils.PrintInfo("Simulating full dungeon: 5/5")
     end

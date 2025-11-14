@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(luac:*)",
+      "Bash(find:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
