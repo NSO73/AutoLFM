@@ -1,103 +1,54 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/">
-  <Script file="UI\Content\Quests.lua"/>
 
   <!--==========================================================================
     Quests Content Panel
-    ==========================================================================
-    Displays player's quest log with checkboxes for LFM selection
     ==========================================================================-->
-  <Frame name="AutoLFM_Content_Quests" parent="AutoLFM_MainFrame_Content" hidden="true" virtual="true">
+  <Frame name="AutoLFM_Content_Quests" virtual="true">
     <Size>
-      <AbsDimension x="298" y="230"/>
+      <AbsDimension x="298" y="252"/>
     </Size>
     <Anchors>
       <Anchor point="TOPLEFT"/>
     </Anchors>
-    <Frames>
-      <!-- Quest Checkbox Template -->
-      <CheckButton name="AutoLFM_QuestCheckbox_Template" virtual="true" inherits="UICheckButtonTemplate">
-        <Size>
-          <AbsDimension x="280" y="20"/>
-        </Size>
-        <Layers>
-          <Layer level="ARTWORK">
-            <FontString name="$parent_Label" inherits="GameFontNormalSmall" justifyH="LEFT">
-              <Size>
-                <AbsDimension x="260" y="20"/>
-              </Size>
-              <Anchors>
-                <Anchor point="LEFT">
-                  <Offset>
-                    <AbsDimension x="25" y="0"/>
-                  </Offset>
-                </Anchor>
-              </Anchors>
-            </FontString>
-          </Layer>
-        </Layers>
-        <Scripts>
-          <OnClick>
-            AutoLFM.UI.Content.Quests.OnQuestToggle(this)
-          </OnClick>
-          <OnEnter>
-            AutoLFM.UI.Content.Quests.OnQuestEnter(this)
-          </OnEnter>
-          <OnLeave>
-            GameTooltip:Hide()
-          </OnLeave>
-        </Scripts>
-      </CheckButton>
 
-      <!-- Refresh Button -->
-      <Button name="$parent_RefreshButton" inherits="UIPanelButtonTemplate" text="Refresh Quest Log">
-        <Size>
-          <AbsDimension x="140" y="22"/>
-        </Size>
-        <Anchors>
-          <Anchor point="BOTTOM">
-            <Offset>
-              <AbsDimension x="0" y="5"/>
-            </Offset>
-          </Anchor>
-        </Anchors>
-        <Scripts>
-          <OnClick>
-            AutoLFM.UI.Content.Quests.OnRefreshClick()
-          </OnClick>
-        </Scripts>
-      </Button>
-
-      <!-- Empty Message -->
-      <Frame name="$parent_EmptyMessage" hidden="true">
-        <Size>
-          <AbsDimension x="260" y="60"/>
-        </Size>
-        <Anchors>
-          <Anchor point="CENTER">
-            <Offset>
-              <AbsDimension x="0" y="-20"/>
-            </Offset>
-          </Anchor>
-        </Anchors>
-        <Layers>
-          <Layer level="ARTWORK">
-            <FontString inherits="GameFontNormal" text="No quests in your quest log">
-              <Anchors>
-                <Anchor point="CENTER"/>
-              </Anchors>
-              <Color r="0.6" g="0.6" b="0.6"/>
-            </FontString>
-          </Layer>
-        </Layers>
-      </Frame>
-    </Frames>
-    <Scripts>
-      <OnLoad>
-        AutoLFM.UI.Content.Quests.OnLoad(this)
-      </OnLoad>
-      <OnShow>
-        AutoLFM.UI.Content.Quests.OnShow(this)
-      </OnShow>
-    </Scripts>
+    <Layers>
+      <Layer level="BACKGROUND">
+        <Texture file="Interface\AddOns\AutoLFM3\UI\Textures\ContentBackground">
+          <Anchors>
+            <Anchor point="TOPLEFT"/>
+            <Anchor point="BOTTOMRIGHT"/>
+          </Anchors>
+          <Color r="0.1" g="0.1" b="0.1" a="0.5"/>
+        </Texture>
+      </Layer>
+      <Layer level="ARTWORK">
+        <FontString inherits="GameFontHighlightLarge" text="Quests">
+          <Anchors>
+            <Anchor point="TOP">
+              <Offset>
+                <AbsDimension x="0" y="-10"/>
+              </Offset>
+            </Anchor>
+          </Anchors>
+        </FontString>
+        <FontString inherits="GameFontNormalSmall" text="Select quests to broadcast">
+          <Anchors>
+            <Anchor point="TOP">
+              <Offset>
+                <AbsDimension x="0" y="-35"/>
+              </Offset>
+            </Anchor>
+          </Anchors>
+          <Color r="0.7" g="0.7" b="0.7"/>
+        </FontString>
+        <FontString inherits="GameFontNormal" text="[PLACEHOLDER: Quests Content]">
+          <Anchors>
+            <Anchor point="CENTER"/>
+          </Anchors>
+          <Color r="1" g="1" b="0"/>
+        </FontString>
+      </Layer>
+    </Layers>
   </Frame>
+
 </Ui>

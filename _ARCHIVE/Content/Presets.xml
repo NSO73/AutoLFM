@@ -1,0 +1,254 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/">
+  <Script file="UI\Content\Presets.lua"/>
+
+  <!--==========================================================================
+    Presets Content Panel
+    ==========================================================================
+    Displays saved presets with load/delete buttons
+    ==========================================================================-->
+  <Frame name="AutoLFM_Content_Presets" parent="AutoLFM_MainFrame_Content" hidden="true" virtual="true">
+    <Size>
+      <AbsDimension x="298" y="230"/>
+    </Size>
+    <Anchors>
+      <Anchor point="TOPLEFT"/>
+    </Anchors>
+    <Frames>
+      <!-- Preset Row Template -->
+      <Frame name="AutoLFM_PresetRow_Template" virtual="true">
+        <Size>
+          <AbsDimension x="280" y="30"/>
+        </Size>
+        <Layers>
+          <Layer level="BACKGROUND">
+            <Texture name="$parent_Background">
+              <Color r="0.1" g="0.1" b="0.1" a="0.3"/>
+              <Anchors>
+                <Anchor point="TOPLEFT"/>
+                <Anchor point="BOTTOMRIGHT"/>
+              </Anchors>
+            </Texture>
+          </Layer>
+          <Layer level="ARTWORK">
+            <FontString name="$parent_Name" inherits="GameFontNormal" justifyH="LEFT">
+              <Size>
+                <AbsDimension x="150" y="24"/>
+              </Size>
+              <Anchors>
+                <Anchor point="LEFT">
+                  <Offset>
+                    <AbsDimension x="10" y="0"/>
+                  </Offset>
+                </Anchor>
+              </Anchors>
+            </FontString>
+          </Layer>
+        </Layers>
+        <Frames>
+          <!-- Load Button -->
+          <Button name="$parent_LoadButton" inherits="UIPanelButtonTemplate" text="Load">
+            <Size>
+              <AbsDimension x="50" y="20"/>
+            </Size>
+            <Anchors>
+              <Anchor point="RIGHT">
+                <Offset>
+                  <AbsDimension x="-60" y="0"/>
+                </Offset>
+              </Anchor>
+            </Anchors>
+            <Scripts>
+              <OnClick>
+                AutoLFM.UI.Content.Presets.OnLoadPreset(this:GetParent())
+              </OnClick>
+            </Scripts>
+          </Button>
+          <!-- Delete Button -->
+          <Button name="$parent_DeleteButton" inherits="UIPanelButtonTemplate" text="Del">
+            <Size>
+              <AbsDimension x="50" y="20"/>
+            </Size>
+            <Anchors>
+              <Anchor point="RIGHT">
+                <Offset>
+                  <AbsDimension x="-5" y="0"/>
+                </Offset>
+              </Anchor>
+            </Anchors>
+            <Scripts>
+              <OnClick>
+                AutoLFM.UI.Content.Presets.OnDeletePreset(this:GetParent())
+              </OnClick>
+            </Scripts>
+          </Button>
+        </Frames>
+        <Scripts>
+          <OnEnter>
+            AutoLFM.UI.Content.Presets.OnPresetEnter(this)
+          </OnEnter>
+          <OnLeave>
+            GameTooltip:Hide()
+          </OnLeave>
+        </Scripts>
+      </Frame>
+
+      <!-- Empty Message -->
+      <Frame name="$parent_EmptyMessage" hidden="true">
+        <Size>
+          <AbsDimension x="260" y="60"/>
+        </Size>
+        <Anchors>
+          <Anchor point="CENTER">
+            <Offset>
+              <AbsDimension x="0" y="-20"/>
+            </Offset>
+          </Anchor>
+        </Anchors>
+        <Layers>
+          <Layer level="ARTWORK">
+            <FontString inherits="GameFontNormal" text="No saved presets">
+              <Anchors>
+                <Anchor point="TOP"/>
+              </Anchors>
+              <Color r="0.6" g="0.6" b="0.6"/>
+            </FontString>
+            <FontString inherits="GameFontNormalSmall" text="Use the + button to save current selection">
+              <Anchors>
+                <Anchor point="TOP">
+                  <Offset>
+                    <AbsDimension x="0" y="-20"/>
+                  </Offset>
+                </Anchor>
+              </Anchors>
+              <Color r="0.5" g="0.5" b="0.5"/>
+            </FontString>
+          </Layer>
+        </Layers>
+      </Frame>
+    </Frames>
+    <Scripts>
+      <OnLoad>
+        AutoLFM.UI.Content.Presets.OnLoad(this)
+      </OnLoad>
+      <OnShow>
+        AutoLFM.UI.Content.Presets.OnShow(this)
+      </OnShow>
+    </Scripts>
+  </Frame>
+
+  <!--==========================================================================
+    Save Preset Popup
+    ==========================================================================-->
+  <Frame name="AutoLFM_SavePresetPopup" parent="UIParent" frameStrata="DIALOG" hidden="true" toplevel="true" enableMouse="true">
+    <Size>
+      <AbsDimension x="320" y="150"/>
+    </Size>
+    <Anchors>
+      <Anchor point="CENTER"/>
+    </Anchors>
+    <Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background" edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
+      <BackgroundInsets>
+        <AbsInset left="11" right="12" top="12" bottom="11"/>
+      </BackgroundInsets>
+      <TileSize>
+        <AbsValue val="32"/>
+      </TileSize>
+      <EdgeSize>
+        <AbsValue val="32"/>
+      </EdgeSize>
+    </Backdrop>
+    <Layers>
+      <Layer level="ARTWORK">
+        <FontString name="$parent_Title" inherits="GameFontNormal" text="Save Preset">
+          <Anchors>
+            <Anchor point="TOP">
+              <Offset>
+                <AbsDimension x="0" y="-20"/>
+              </Offset>
+            </Anchor>
+          </Anchors>
+        </FontString>
+        <FontString name="$parent_Label" inherits="GameFontNormalSmall" text="Preset Name:">
+          <Anchors>
+            <Anchor point="TOPLEFT">
+              <Offset>
+                <AbsDimension x="30" y="-50"/>
+              </Offset>
+            </Anchor>
+          </Anchors>
+        </FontString>
+      </Layer>
+    </Layers>
+    <Frames>
+      <!-- Name Input -->
+      <EditBox name="$parent_NameInput" inherits="InputBoxTemplate" autoFocus="true" letters="32">
+        <Size>
+          <AbsDimension x="260" y="32"/>
+        </Size>
+        <Anchors>
+          <Anchor point="TOP">
+            <Offset>
+              <AbsDimension x="0" y="-70"/>
+            </Offset>
+          </Anchor>
+        </Anchors>
+        <Scripts>
+          <OnEnterPressed>
+            AutoLFM.UI.Content.Presets.OnSaveConfirm()
+          </OnEnterPressed>
+          <OnEscapePressed>
+            AutoLFM.UI.Content.Presets.OnSaveCancel()
+          </OnEscapePressed>
+        </Scripts>
+      </EditBox>
+      <!-- Save Button -->
+      <Button name="$parent_SaveButton" inherits="UIPanelButtonTemplate" text="Save">
+        <Size>
+          <AbsDimension x="100" y="22"/>
+        </Size>
+        <Anchors>
+          <Anchor point="BOTTOM">
+            <Offset>
+              <AbsDimension x="-55" y="20"/>
+            </Offset>
+          </Anchor>
+        </Anchors>
+        <Scripts>
+          <OnClick>
+            AutoLFM.UI.Content.Presets.OnSaveConfirm()
+          </OnClick>
+        </Scripts>
+      </Button>
+      <!-- Cancel Button -->
+      <Button name="$parent_CancelButton" inherits="UIPanelButtonTemplate" text="Cancel">
+        <Size>
+          <AbsDimension x="100" y="22"/>
+        </Size>
+        <Anchors>
+          <Anchor point="BOTTOM">
+            <Offset>
+              <AbsDimension x="55" y="20"/>
+            </Offset>
+          </Anchor>
+        </Anchors>
+        <Scripts>
+          <OnClick>
+            AutoLFM.UI.Content.Presets.OnSaveCancel()
+          </OnClick>
+        </Scripts>
+      </Button>
+    </Frames>
+    <Scripts>
+      <OnLoad>
+        tinsert(UISpecialFrames, this:GetName())
+      </OnLoad>
+      <OnShow>
+        local input = getglobal(this:GetName().."_NameInput")
+        if input then
+          input:SetText("")
+          input:SetFocus()
+        end
+      </OnShow>
+    </Scripts>
+  </Frame>
+</Ui>

@@ -6,7 +6,7 @@ AutoLFM = AutoLFM or {}
 AutoLFM.Components = AutoLFM.Components or {}
 AutoLFM.Components.WelcomePopup = AutoLFM.Components.WelcomePopup or {}
 
-
+local M = AutoLFM.Components.WelcomePopup
 
 --=============================================================================
 -- Local Constants
@@ -84,11 +84,8 @@ local messages = {
 --=============================================================================
 -- Helpers
 --=============================================================================
-M.GetPartialTitleText = function(blockIndex, letterIndex)
-  if not AutoLFM.Core then return "" end
-  if not AutoLFM.Core.Utils then return "" end
-  if not AutoLFM.Core.Utils.RGBToHex then return "" end
 
+AutoLFM.Components.WelcomePopup.GetPartialTitleText = function(blockIndex, letterIndex)
   local text = ""
   for i = 1, blockIndex do
     local block = titleBlocks[i]
@@ -105,17 +102,13 @@ M.GetPartialTitleText = function(blockIndex, letterIndex)
 end
 
 local function GetPartialColoredLine()
-  if not AutoLFM.Core then return "" end
-  if not AutoLFM.Core.Utils then return "" end
-  if not AutoLFM.Core.Utils.RGBToHex then return "" end
-
   local txt = ""
   local count = 0
   local line = messages[2]
   if not line or not line.subblocks then return "" end
 
   for _, block in ipairs(line.subblocks) do
-    local color = "|c" .. AutoLFM.Core.Utils.RGBToHex(block.r, block.g, block.b)
+    local color = "|c" .. RGBToHex(block.r, block.g, block.b)
     for i = 1, string.len(block.text) do
       count = count + 1
       if count <= coloredLetterIndex then
@@ -128,7 +121,7 @@ local function GetPartialColoredLine()
   return txt
 end
 
-M.FadeFrame = function(frame, mode, duration, onFinish)
+AutoLFM.Components.WelcomePopup.FadeFrame = function(frame, mode, duration, onFinish)
   if not frame then return end
 
   fadeMode, fadeElapsed, fadeTotal = mode, 0, duration
@@ -140,7 +133,7 @@ end
 --=============================================================================
 -- Create Popup
 --=============================================================================
-M.CreatePopup = function()
+AutoLFM.Components.WelcomePopup.CreatePopup = function()
   local frame = CreateFrame("Frame", "AutoLFM_WelcomePopup", UIParent)
   frame:SetBackdrop({
     bgFile = "Interface/Tooltips/UI-Tooltip-Background",
@@ -184,11 +177,7 @@ end
 --=============================================================================
 -- OnUpdate
 --=============================================================================
-M.OnUpdate = function()
-  if not AutoLFM.Core then return end
-  if not AutoLFM.Core.Utils then return end
-  if not AutoLFM.Core.Utils.RGBToHex then return end
-
+AutoLFM.Components.WelcomePopup.OnUpdate = function()
   local now = GetTime()
   local elapsed = lastUpdate and (now - lastUpdate) or 0
   lastUpdate = now
@@ -261,7 +250,7 @@ M.OnUpdate = function()
             local txt = ""
             local count = 0
             for _, block in ipairs(msg.subblocks) do
-              local color = "|c" .. AutoLFM.Core.Utils.RGBToHex(block.r or 1, block.g or 1, block.b or 1)
+              local color = "|c" .. RGBToHex(block.r or 1, block.g or 1, block.b or 1)
               for i = 1, string.len(block.text) do
                 count = count + 1
                 if count <= coloredLetterIndex then

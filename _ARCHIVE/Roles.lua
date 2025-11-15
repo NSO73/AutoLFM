@@ -33,56 +33,46 @@ local ROLE_CONFIG = {
 }
 
 --=============================================================================
--- COMMANDS
+-- PUBLIC API
 --=============================================================================
 
 -----------------------------------------------------------------------------
--- Register Command Handlers
+-- Toggle Role
+--   @param role string: Role name (tank, heal, dps)
 -----------------------------------------------------------------------------
-function AutoLFM.Logic.Roles.RegisterCommands()
-    -- Toggle role command
-    AutoLFM.Core.Maestro.RegisterCommand({
-        key = "Roles.Toggle",
-        description = "Toggles a role selection (tank, heal, or dps)",
-        handler = function(role)
-            if not role or not ROLE_CONFIG[role] then return end
+function AutoLFM.Logic.Roles.Toggle(role)
+    if not role or not ROLE_CONFIG[role] then return end
 
-            -- Toggle local state
-            selectedRoles[role] = not selectedRoles[role]
-            local isActive = selectedRoles[role]
+    -- Toggle local state
+    selectedRoles[role] = not selectedRoles[role]
+    local isActive = selectedRoles[role]
 
-            -- Update button background visual
-            AutoLFM.Logic.Roles.UpdateRoleButton(ROLE_CONFIG[role].button, isActive)
+    -- Update button background visual
+    AutoLFM.Logic.Roles.UpdateRoleButton(ROLE_CONFIG[role].button, isActive)
 
-            -- Update checkbox visual (without triggering OnClick)
-            local checkbox = getglobal(ROLE_CONFIG[role].checkbox)
+    -- Update checkbox visual (without triggering OnClick)
+    local checkbox = getglobal(ROLE_CONFIG[role].checkbox)
+    if checkbox then
+        AutoLFM.Core.Utils.SetCheckboxState(checkbox, isActive)
+    end
+end
+
+-----------------------------------------------------------------------------
+-- Deselect All Roles
+-----------------------------------------------------------------------------
+function AutoLFM.Logic.Roles.DeselectAll()
+    for role, config in pairs(ROLE_CONFIG) do
+        if selectedRoles[role] then
+            selectedRoles[role] = false
+
+            -- Update UI for this role
+            AutoLFM.Logic.Roles.UpdateRoleButton(config.button, false)
+            local checkbox = getglobal(config.checkbox)
             if checkbox then
-                AutoLFM.Core.Utils.SetCheckboxState(checkbox, isActive)
-            end
-
-            AutoLFM.Core.Maestro.Emit("Roles.Toggled", role, isActive)
-        end
-    })
-
-    -- Deselect all roles command
-    AutoLFM.Core.Maestro.RegisterCommand({
-        key = "Roles.DeselectAll",
-        description = "Deselects all role selections",
-        handler = function()
-            for role, config in pairs(ROLE_CONFIG) do
-                if selectedRoles[role] then
-                    selectedRoles[role] = false
-
-                    -- Update UI for this role
-                    AutoLFM.Logic.Roles.UpdateRoleButton(config.button, false)
-                    local checkbox = getglobal(config.checkbox)
-                    if checkbox then
-                        AutoLFM.Core.Utils.SetCheckboxState(checkbox, false)
-                    end
-                end
+                AutoLFM.Core.Utils.SetCheckboxState(checkbox, false)
             end
         end
-    })
+    end
 end
 
 --=============================================================================
@@ -161,8 +151,8 @@ end
 -- Auto-register initialization
 -----------------------------------------------------------------------------
 AutoLFM.Core.Maestro.RegisterInit("roles.init", function()
-    AutoLFM.Logic.Roles.RegisterCommands()
+    -- Roles module initialized
 end, {
     key = "Roles.Init",
-    description = "Register role selection commands"
+    description = "Role selection management"
 })

@@ -179,10 +179,6 @@ local function ProcessRegions(frame)
   end
 end
 
-local function ProcessRolesBackground(frame)
-  if not frame then return end
-end
-
 local function ProcessChildren(frame, processFunc)
   if not frame then return end
   if not frame.GetChildren then return end
@@ -201,7 +197,6 @@ function AutoLFM.Components.DarkUI.DarkenFrame(frame)
   if not enabled then return end
   if not frame then return end
 
-  ProcessRolesBackground(frame)
   ProcessChildren(frame, AutoLFM.Components.DarkUI.DarkenFrame)
 
   if frame.GetRegions then

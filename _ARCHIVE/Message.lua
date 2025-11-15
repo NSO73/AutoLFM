@@ -226,149 +226,69 @@ end
 -- Initialize Message Module
 -----------------------------------------------------------------------------
 function AutoLFM.Logic.Message.Init()
-    -- Templates are already loaded by Maestro.Init()
-
-    -- Register event listeners to auto-update preview message
-    local function updatePreview()
-        AutoLFM.Logic.Message.UpdatePreview()
-    end
-
-    -- Listen to all events that affect the message
-    AutoLFM.Core.Maestro.On("Dungeons.SelectionChanged", updatePreview, {
-        key = "Messages.UpdatePreview",
-        description = "Updates message preview when dungeon selection changes"
-    })
-
-    AutoLFM.Core.Maestro.On("Dungeons.AllDeselected", updatePreview, {
-        key = "Messages.UpdatePreview",
-        description = "Updates message preview when all dungeons are deselected"
-    })
-
-    AutoLFM.Core.Maestro.On("Raids.SelectionChanged", updatePreview, {
-        key = "Messages.UpdatePreview",
-        description = "Updates message preview when raid selection changes"
-    })
-
-    AutoLFM.Core.Maestro.On("Raids.AllDeselected", updatePreview, {
-        key = "Messages.UpdatePreview",
-        description = "Updates message preview when all raids are deselected"
-    })
-
-    AutoLFM.Core.Maestro.On("Raids.SizeChanged", updatePreview, {
-        key = "Messages.UpdatePreview",
-        description = "Updates message preview when raid size changes"
-    })
-
-    AutoLFM.Core.Maestro.On("Quests.SelectionChanged", updatePreview, {
-        key = "Messages.UpdatePreview",
-        description = "Updates message preview when quest selection changes"
-    })
-
-    AutoLFM.Core.Maestro.On("Roles.Toggled", updatePreview, {
-        key = "Messages.UpdatePreview",
-        description = "Updates message preview when role is toggled"
-    })
-
-    AutoLFM.Core.Maestro.On("Broadcasts.CustomMessageChanged", updatePreview, {
-        key = "Messages.UpdatePreview",
-        description = "Updates message preview when custom message changes"
-    })
-
-    AutoLFM.Core.Maestro.On("Messages.TemplateChanged", updatePreview, {
-        key = "Messages.UpdatePreview",
-        description = "Updates message preview when template changes"
-    })
+    -- Empty function, listeners removed
 end
 
 --=============================================================================
--- COMMANDS
+-- PUBLIC API
 --=============================================================================
 
 -----------------------------------------------------------------------------
--- Register Command Handlers
+-- Set Dungeon Template
+--   @param template string: Template string
 -----------------------------------------------------------------------------
-function AutoLFM.Logic.Message.RegisterCommands()
-    -- Set dungeon template command
-    AutoLFM.Core.Maestro.RegisterCommand({
-        key = "Messages.SetDungeonTemplate",
-        description = "Sets the message template for dungeons",
-        handler = function(template)
-            if not template or template == "" then
-                template = AutoLFM.Core.Constants.DEFAULT_MESSAGE_TEMPLATES.dungeon
-            end
+function AutoLFM.Logic.Message.SetDungeonTemplate(template)
+    if not template or template == "" then
+        template = AutoLFM.Core.Constants.DEFAULT_MESSAGE_TEMPLATES.dungeon
+    end
 
-            if AutoLFM.Logic.Content.Broadcasts and AutoLFM.Logic.Content.Broadcasts.SetDungeonTemplate then
-                AutoLFM.Logic.Content.Broadcasts.SetDungeonTemplate(template)
-            end
+    if AutoLFM.Logic.Content.Broadcasts and AutoLFM.Logic.Content.Broadcasts.SetDungeonTemplate then
+        AutoLFM.Logic.Content.Broadcasts.SetDungeonTemplate(template)
+    end
 
-            AutoLFM.Core.Persistent.SetMessageTemplateDungeon(template)
-            AutoLFM.Core.Maestro.Emit("Messages.TemplateChanged", "dungeon", template)
-        end
-    })
+    AutoLFM.Core.Persistent.SetMessageTemplateDungeon(template)
+end
 
-    -- Set raid template command
-    AutoLFM.Core.Maestro.RegisterCommand({
-        key = "Messages.SetRaidTemplate",
-        description = "Sets the message template for raids",
-        handler = function(template)
-            if not template or template == "" then
-                template = AutoLFM.Core.Constants.DEFAULT_MESSAGE_TEMPLATES.raid
-            end
+-----------------------------------------------------------------------------
+-- Set Raid Template
+--   @param template string: Template string
+-----------------------------------------------------------------------------
+function AutoLFM.Logic.Message.SetRaidTemplate(template)
+    if not template or template == "" then
+        template = AutoLFM.Core.Constants.DEFAULT_MESSAGE_TEMPLATES.raid
+    end
 
-            if AutoLFM.Logic.Content.Broadcasts and AutoLFM.Logic.Content.Broadcasts.SetRaidTemplate then
-                AutoLFM.Logic.Content.Broadcasts.SetRaidTemplate(template)
-            end
+    if AutoLFM.Logic.Content.Broadcasts and AutoLFM.Logic.Content.Broadcasts.SetRaidTemplate then
+        AutoLFM.Logic.Content.Broadcasts.SetRaidTemplate(template)
+    end
 
-            AutoLFM.Core.Persistent.SetMessageTemplateRaid(template)
-            AutoLFM.Core.Maestro.Emit("Messages.TemplateChanged", "raid", template)
-        end
-    })
+    AutoLFM.Core.Persistent.SetMessageTemplateRaid(template)
+end
 
-    -- Reset dungeon template to default
-    AutoLFM.Core.Maestro.RegisterCommand({
-        key = "Messages.ResetDungeonTemplate",
-        description = "Resets the dungeon template to default",
-        handler = function()
-            local defaultTemplate = AutoLFM.Core.Constants.DEFAULT_MESSAGE_TEMPLATES.dungeon
+-----------------------------------------------------------------------------
+-- Reset Dungeon Template
+-----------------------------------------------------------------------------
+function AutoLFM.Logic.Message.ResetDungeonTemplate()
+    local defaultTemplate = AutoLFM.Core.Constants.DEFAULT_MESSAGE_TEMPLATES.dungeon
 
-            if AutoLFM.Logic.Content.Broadcasts and AutoLFM.Logic.Content.Broadcasts.SetDungeonTemplate then
-                AutoLFM.Logic.Content.Broadcasts.SetDungeonTemplate(defaultTemplate)
-            end
+    if AutoLFM.Logic.Content.Broadcasts and AutoLFM.Logic.Content.Broadcasts.SetDungeonTemplate then
+        AutoLFM.Logic.Content.Broadcasts.SetDungeonTemplate(defaultTemplate)
+    end
 
-            AutoLFM.Core.Persistent.SetMessageTemplateDungeon(defaultTemplate)
-            AutoLFM.Core.Maestro.Emit("Messages.TemplateChanged", "dungeon", defaultTemplate)
-        end
-    })
+    AutoLFM.Core.Persistent.SetMessageTemplateDungeon(defaultTemplate)
+end
 
-    -- Reset raid template to default
-    AutoLFM.Core.Maestro.RegisterCommand({
-        key = "Messages.ResetRaidTemplate",
-        description = "Resets the raid template to default",
-        handler = function()
-            local defaultTemplate = AutoLFM.Core.Constants.DEFAULT_MESSAGE_TEMPLATES.raid
+-----------------------------------------------------------------------------
+-- Reset Raid Template
+-----------------------------------------------------------------------------
+function AutoLFM.Logic.Message.ResetRaidTemplate()
+    local defaultTemplate = AutoLFM.Core.Constants.DEFAULT_MESSAGE_TEMPLATES.raid
 
-            if AutoLFM.Logic.Content.Broadcasts and AutoLFM.Logic.Content.Broadcasts.SetRaidTemplate then
-                AutoLFM.Logic.Content.Broadcasts.SetRaidTemplate(defaultTemplate)
-            end
+    if AutoLFM.Logic.Content.Broadcasts and AutoLFM.Logic.Content.Broadcasts.SetRaidTemplate then
+        AutoLFM.Logic.Content.Broadcasts.SetRaidTemplate(defaultTemplate)
+    end
 
-            AutoLFM.Core.Persistent.SetMessageTemplateRaid(defaultTemplate)
-            AutoLFM.Core.Maestro.Emit("Messages.TemplateChanged", "raid", defaultTemplate)
-        end
-    })
-
-    -- Preview message in chat
-    AutoLFM.Core.Maestro.RegisterCommand({
-        key = "Messages.Preview",
-        description = "Previews the generated message in chat",
-        handler = function()
-            local message = AutoLFM.Logic.Message.BuildMessage()
-            if message and message ~= "" then
-                AutoLFM.Core.Utils.PrintInfo("Preview: " .. message)
-            else
-                AutoLFM.Core.Utils.PrintWarning("No message to preview (select dungeons/raids first)")
-            end
-        end
-    })
+    AutoLFM.Core.Persistent.SetMessageTemplateRaid(defaultTemplate)
 end
 
 --=============================================================================
@@ -380,7 +300,6 @@ end
 -----------------------------------------------------------------------------
 AutoLFM.Core.Maestro.RegisterInit("message.init", function()
     AutoLFM.Logic.Message.Init()
-    AutoLFM.Logic.Message.RegisterCommands()
 end, {
     key = "Messages.Init",
     description = "Initialize message generation with customizable templates"

@@ -1,0 +1,294 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/">
+  <Script file="UI\Content\Broadcasts.lua"/>
+
+  <!--==========================================================================
+    Broadcasts Content Panel
+    ==========================================================================
+    Channel selection, interval slider, and message template editor
+    ==========================================================================-->
+  <Frame name="AutoLFM_Content_Broadcasts" parent="AutoLFM_MainFrame_Content" hidden="true" virtual="true">
+    <Size>
+      <AbsDimension x="298" y="230"/>
+    </Size>
+    <Anchors>
+      <Anchor point="TOPLEFT"/>
+    </Anchors>
+    <Layers>
+      <Layer level="ARTWORK">
+        <!-- Channels Label -->
+        <FontString name="$parent_ChannelsLabel" inherits="GameFontNormal" text="Broadcast Channels:">
+          <Anchors>
+            <Anchor point="TOPLEFT">
+              <Offset>
+                <AbsDimension x="10" y="-10"/>
+              </Offset>
+            </Anchor>
+          </Anchors>
+        </FontString>
+        <!-- Interval Label -->
+        <FontString name="$parent_IntervalLabel" inherits="GameFontNormal" text="Interval (seconds):">
+          <Anchors>
+            <Anchor point="TOPLEFT">
+              <Offset>
+                <AbsDimension x="10" y="-80"/>
+              </Offset>
+            </Anchor>
+          </Anchors>
+        </FontString>
+        <!-- Template Label -->
+        <FontString name="$parent_TemplateLabel" inherits="GameFontNormal" text="Message Template:">
+          <Anchors>
+            <Anchor point="TOPLEFT">
+              <Offset>
+                <AbsDimension x="10" y="-135"/>
+              </Offset>
+            </Anchor>
+          </Anchors>
+        </FontString>
+      </Layer>
+    </Layers>
+    <Frames>
+      <!-- Channel Checkboxes -->
+      <CheckButton name="$parent_LookingForGroup" inherits="UICheckButtonTemplate">
+        <Size>
+          <AbsDimension x="20" y="20"/>
+        </Size>
+        <Anchors>
+          <Anchor point="TOPLEFT">
+            <Offset>
+              <AbsDimension x="10" y="-30"/>
+            </Offset>
+          </Anchor>
+        </Anchors>
+        <Layers>
+          <Layer level="ARTWORK">
+            <FontString name="$parent_Label" inherits="GameFontNormalSmall" text="LookingForGroup">
+              <Anchors>
+                <Anchor point="LEFT" relativePoint="RIGHT">
+                  <Offset>
+                    <AbsDimension x="5" y="0"/>
+                  </Offset>
+                </Anchor>
+              </Anchors>
+            </FontString>
+          </Layer>
+        </Layers>
+        <Scripts>
+          <OnClick>
+            AutoLFM.UI.Content.Broadcasts.OnChannelToggle("LookingForGroup", this:GetChecked() == 1)
+          </OnClick>
+        </Scripts>
+      </CheckButton>
+
+      <CheckButton name="$parent_General" inherits="UICheckButtonTemplate">
+        <Size>
+          <AbsDimension x="20" y="20"/>
+        </Size>
+        <Anchors>
+          <Anchor point="TOPLEFT">
+            <Offset>
+              <AbsDimension x="145" y="-30"/>
+            </Offset>
+          </Anchor>
+        </Anchors>
+        <Layers>
+          <Layer level="ARTWORK">
+            <FontString name="$parent_Label" inherits="GameFontNormalSmall" text="General">
+              <Anchors>
+                <Anchor point="LEFT" relativePoint="RIGHT">
+                  <Offset>
+                    <AbsDimension x="5" y="0"/>
+                  </Offset>
+                </Anchor>
+              </Anchors>
+            </FontString>
+          </Layer>
+        </Layers>
+        <Scripts>
+          <OnClick>
+            AutoLFM.UI.Content.Broadcasts.OnChannelToggle("General", this:GetChecked() == 1)
+          </OnClick>
+        </Scripts>
+      </CheckButton>
+
+      <CheckButton name="$parent_LocalDefense" inherits="UICheckButtonTemplate">
+        <Size>
+          <AbsDimension x="20" y="20"/>
+        </Size>
+        <Anchors>
+          <Anchor point="TOPLEFT">
+            <Offset>
+              <AbsDimension x="10" y="-52"/>
+            </Offset>
+          </Anchor>
+        </Anchors>
+        <Layers>
+          <Layer level="ARTWORK">
+            <FontString name="$parent_Label" inherits="GameFontNormalSmall" text="LocalDefense">
+              <Anchors>
+                <Anchor point="LEFT" relativePoint="RIGHT">
+                  <Offset>
+                    <AbsDimension x="5" y="0"/>
+                  </Offset>
+                </Anchor>
+              </Anchors>
+            </FontString>
+          </Layer>
+        </Layers>
+        <Scripts>
+          <OnClick>
+            AutoLFM.UI.Content.Broadcasts.OnChannelToggle("LocalDefense", this:GetChecked() == 1)
+          </OnClick>
+        </Scripts>
+      </CheckButton>
+
+      <CheckButton name="$parent_GuildRecruitment" inherits="UICheckButtonTemplate">
+        <Size>
+          <AbsDimension x="20" y="20"/>
+        </Size>
+        <Anchors>
+          <Anchor point="TOPLEFT">
+            <Offset>
+              <AbsDimension x="145" y="-52"/>
+            </Offset>
+          </Anchor>
+        </Anchors>
+        <Layers>
+          <Layer level="ARTWORK">
+            <FontString name="$parent_Label" inherits="GameFontNormalSmall" text="GuildRecruitment">
+              <Anchors>
+                <Anchor point="LEFT" relativePoint="RIGHT">
+                  <Offset>
+                    <AbsDimension x="5" y="0"/>
+                  </Offset>
+                </Anchor>
+              </Anchors>
+            </FontString>
+          </Layer>
+        </Layers>
+        <Scripts>
+          <OnClick>
+            AutoLFM.UI.Content.Broadcasts.OnChannelToggle("GuildRecruitment", this:GetChecked() == 1)
+          </OnClick>
+        </Scripts>
+      </CheckButton>
+
+      <!-- Interval Slider -->
+      <Slider name="$parent_IntervalSlider" inherits="OptionsSliderTemplate">
+        <Size>
+          <AbsDimension x="260" y="17"/>
+        </Size>
+        <Anchors>
+          <Anchor point="TOPLEFT">
+            <Offset>
+              <AbsDimension x="20" y="-100"/>
+            </Offset>
+          </Anchor>
+        </Anchors>
+        <Layers>
+          <Layer level="ARTWORK">
+            <FontString name="$parent_Low" inherits="GameFontHighlightSmall" text="30">
+              <Anchors>
+                <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT">
+                  <Offset>
+                    <AbsDimension x="2" y="3"/>
+                  </Offset>
+                </Anchor>
+              </Anchors>
+            </FontString>
+            <FontString name="$parent_High" inherits="GameFontHighlightSmall" text="300">
+              <Anchors>
+                <Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT">
+                  <Offset>
+                    <AbsDimension x="-2" y="3"/>
+                  </Offset>
+                </Anchor>
+              </Anchors>
+            </FontString>
+            <FontString name="$parent_Text" inherits="GameFontHighlightSmall">
+              <Anchors>
+                <Anchor point="TOP" relativePoint="BOTTOM">
+                  <Offset>
+                    <AbsDimension x="0" y="3"/>
+                  </Offset>
+                </Anchor>
+              </Anchors>
+            </FontString>
+          </Layer>
+        </Layers>
+        <Scripts>
+          <OnLoad>
+            getglobal(this:GetName().."_Low"):SetText("30")
+            getglobal(this:GetName().."_High"):SetText("300")
+            this:SetMinMaxValues(30, 300)
+            this:SetValueStep(10)
+            this:SetValue(60)
+          </OnLoad>
+          <OnValueChanged>
+            AutoLFM.UI.Content.Broadcasts.OnIntervalChanged(arg1)
+          </OnValueChanged>
+        </Scripts>
+      </Slider>
+
+      <!-- Message Template EditBox -->
+      <EditBox name="$parent_TemplateEditBox" inherits="InputBoxTemplate" multiLine="true" autoFocus="false">
+        <Size>
+          <AbsDimension x="270" y="60"/>
+        </Size>
+        <Anchors>
+          <Anchor point="TOPLEFT">
+            <Offset>
+              <AbsDimension x="15" y="-155"/>
+            </Offset>
+          </Anchor>
+        </Anchors>
+        <Scripts>
+          <OnTextChanged>
+            AutoLFM.UI.Content.Broadcasts.OnTemplateChanged(this:GetText())
+          </OnTextChanged>
+          <OnEscapePressed>
+            this:ClearFocus()
+          </OnEscapePressed>
+        </Scripts>
+      </EditBox>
+
+      <!-- Template Help Text -->
+      <Frame name="$parent_HelpText">
+        <Size>
+          <AbsDimension x="270" y="20"/>
+        </Size>
+        <Anchors>
+          <Anchor point="TOPLEFT">
+            <Offset>
+              <AbsDimension x="10" y="-218"/>
+            </Offset>
+          </Anchor>
+        </Anchors>
+        <Layers>
+          <Layer level="ARTWORK">
+            <FontString inherits="GameFontNormalSmall" justifyH="LEFT">
+              <Anchors>
+                <Anchor point="TOPLEFT"/>
+              </Anchors>
+              <Color r="0.7" g="0.7" b="0.7"/>
+            </FontString>
+          </Layer>
+        </Layers>
+        <Scripts>
+          <OnLoad>
+            local text = getglobal(this:GetName()):GetRegions()
+            text:SetText("Use {name}, {role}, {count} in template")
+          </OnLoad>
+        </Scripts>
+      </Frame>
+    </Frames>
+    <Scripts>
+      <OnLoad>
+        AutoLFM.UI.Content.Broadcasts.OnLoad(this)
+      </OnLoad>
+      <OnShow>
+        AutoLFM.UI.Content.Broadcasts.OnShow(this)
+      </OnShow>
+    </Scripts>
+  </Frame>
+</Ui>

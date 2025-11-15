@@ -29,14 +29,14 @@ AutoLFM.Core.Constants.SOUNDS = {
 --=============================================================================
 
 AutoLFM.Core.Constants.COLORS = {
-    GOLD = {id = 1, name = "GOLD", priority = 99, r = 1.0, g = 0.82, b = 0.0, hex = "FFD100"},
-    WHITE = {id = 2, name = "WHITE", priority = 99, r = 1.0, g = 1.0, b = 1.0, hex = "FFFFFF"},
-    GRAY = {id = 3, name = "GRAY", priority = 5, r = 0.5, g = 0.5, b = 0.5, hex = "808080"},
-    GREEN = {id = 4, name = "GREEN", priority = 1, r = 0.25, g = 0.75, b = 0.25, hex = "40BF40"},
-    YELLOW = {id = 5, name = "YELLOW", priority = 2, r = 1.0, g = 1.0, b = 0.0, hex = "FFFF00"},
-    ORANGE = {id = 6, name = "ORANGE", priority = 3, r = 1.0, g = 0.5, b = 0.25, hex = "FF8040"},
-    RED = {id = 7, name = "RED", priority = 4, r = 1.0, g = 0.0, b = 0.0, hex = "FF0000"},
-    BLUE = {id = 8, name = "BLUE", priority = 99, r = 0.0, g = 0.5, b = 1.0, hex = "0080FF"}
+    GOLD = {id = 1, priority = 99, r = 1.0, g = 0.82, b = 0.0, hex = "FFD100"},
+    WHITE = {id = 2, priority = 99, r = 1.0, g = 1.0, b = 1.0, hex = "FFFFFF"},
+    GRAY = {id = 3, priority = 5, r = 0.5, g = 0.5, b = 0.5, hex = "808080"},
+    GREEN = {id = 4, priority = 1, r = 0.25, g = 0.75, b = 0.25, hex = "40BF40"},
+    YELLOW = {id = 5, priority = 2, r = 1.0, g = 1.0, b = 0.0, hex = "FFFF00"},
+    ORANGE = {id = 6, priority = 3, r = 1.0, g = 0.5, b = 0.25, hex = "FF8040"},
+    RED = {id = 7, priority = 4, r = 1.0, g = 0.0, b = 0.0, hex = "FF0000"},
+    BLUE = {id = 8, priority = 99, r = 0.0, g = 0.5, b = 1.0, hex = "0080FF"}
 }
 
 AutoLFM.Core.Constants.CHAT_PREFIX = "|cff808080[|r|cffffffffAuto|r|cff0070ddL|r|cffffffffF|r|cffff0000M|r|cff808080]|r "
@@ -87,15 +87,6 @@ AutoLFM.Core.Constants.DUNGEONS = {
     {name = "Caverns of Time. Black Morass", tag = "Black Morass", levelMin = 60, levelMax = 60}
 }
 
--- Level-based Priority Thresholds for dungeon colors
-AutoLFM.Core.Constants.GREEN_THRESHOLDS = {
-    [1] = 4,  -- Level 1-9
-    [2] = 5,  -- Level 10-19
-    [3] = 6,  -- Level 20-29
-    [4] = 7,  -- Level 30-39
-    [5] = 8   -- Level 40+
-}
-
 --=============================================================================
 -- RAIDS
 --=============================================================================
@@ -114,26 +105,6 @@ AutoLFM.Core.Constants.RAIDS = {
     {name = "Emerald Sanctum", tag = "ES", sizeMin = 30, sizeMax = 40},
     {name = "Temple of Ahn'Qiraj", tag = "AQ40", sizeMin = 20, sizeMax = 40},
     {name = "Naxxramas", tag = "Naxx", sizeMin = 30, sizeMax = 40}
-}
-
---=============================================================================
--- CHANNELS
---=============================================================================
-
-AutoLFM.Core.Constants.CHANNELS = {
-    {name = "LookingForGroup", display = "LFG"},
-    {name = "World", display = "World"},
-    {name = "Hardcore", display = "Hardcore"}
-}
-
---=============================================================================
--- ROLES
---=============================================================================
-
-AutoLFM.Core.Constants.ROLES = {
-    {id = "tank", name = "Tank", display = "Tank"},
-    {id = "heal", name = "Heal", display = "Heal"},
-    {id = "dps", name = "DPS", display = "DPS"}
 }
 
 --=============================================================================

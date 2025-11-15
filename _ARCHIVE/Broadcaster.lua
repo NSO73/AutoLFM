@@ -187,7 +187,6 @@ function AutoLFM.Logic.Broadcaster.SendToChannels(message)
             })
         end
 
-        AutoLFM.Core.Maestro.Emit("Broadcaster.MessageSent", messageCount)
         return true
     end
 
@@ -229,8 +228,6 @@ function AutoLFM.Logic.Broadcaster.SendToChannels(message)
             isActive = isActive
         })
     end
-
-    AutoLFM.Core.Maestro.Emit("Broadcaster.MessageSent", messageCount)
 
     return true
 end
@@ -289,8 +286,6 @@ function AutoLFM.Logic.Broadcaster.Start()
         AutoLFM.Core.Utils.PrintSuccess("Broadcast started")
     end
 
-    AutoLFM.Core.Maestro.Emit("Broadcaster.Started")
-
     return true
 end
 
@@ -317,7 +312,6 @@ function AutoLFM.Logic.Broadcaster.Stop()
     pcall(PlaySoundFile, AutoLFM.Core.Constants.SOUND_PATH .. AutoLFM.Core.Constants.SOUNDS.STOP)
 
     AutoLFM.Core.Utils.PrintWarning("Broadcast stopped")
-    AutoLFM.Core.Maestro.Emit("Broadcaster.Stopped")
 end
 
 -----------------------------------------------------------------------------
@@ -347,9 +341,9 @@ function AutoLFM.Logic.Broadcaster.HandleGroupFull()
 
     AutoLFM.Core.Utils.PrintSuccess("Group is full! Broadcast stopped and selections cleared")
 
-    AutoLFM.Core.Maestro.Dispatch("Selection.ClearAll")
-
-    AutoLFM.Core.Maestro.Emit("Broadcaster.GroupFull")
+    if AutoLFM.Logic.Selection and AutoLFM.Logic.Selection.ClearAll then
+        AutoLFM.Logic.Selection.ClearAll()
+    end
 end
 
 --=============================================================================
@@ -490,42 +484,6 @@ function AutoLFM.Logic.Broadcaster.Init()
 end
 
 --=============================================================================
--- COMMANDS
---=============================================================================
-
------------------------------------------------------------------------------
--- Register Command Handlers
------------------------------------------------------------------------------
-function AutoLFM.Logic.Broadcaster.RegisterCommands()
-    -- Start broadcast command
-    AutoLFM.Core.Maestro.RegisterCommand({
-        key = "Broadcaster.Start",
-        description = "Starts the automatic broadcast system",
-        handler = function()
-            AutoLFM.Logic.Broadcaster.Start()
-        end
-    })
-
-    -- Stop broadcast command
-    AutoLFM.Core.Maestro.RegisterCommand({
-        key = "Broadcaster.Stop",
-        description = "Stops the automatic broadcast system",
-        handler = function()
-            AutoLFM.Logic.Broadcaster.Stop()
-        end
-    })
-
-    -- Toggle broadcast command
-    AutoLFM.Core.Maestro.RegisterCommand({
-        key = "Broadcaster.Toggle",
-        description = "Toggles the automatic broadcast system on/off",
-        handler = function()
-            AutoLFM.Logic.Broadcaster.Toggle()
-        end
-    })
-end
-
---=============================================================================
 -- INITIALIZATION
 --=============================================================================
 
@@ -534,7 +492,6 @@ end
 -----------------------------------------------------------------------------
 AutoLFM.Core.Maestro.RegisterInit("broadcaster.init", function()
     AutoLFM.Logic.Broadcaster.Init()
-    AutoLFM.Logic.Broadcaster.RegisterCommands()
 end, {
     key = "Broadcaster.Init",
     description = "Initialize automatic broadcasting with validation and group full detection"

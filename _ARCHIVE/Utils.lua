@@ -40,6 +40,32 @@ function AutoLFM.Core.Utils.ClearFrameCache()
     frameCache = {}
 end
 
+-----------------------------------------------------------------------------
+-- Show Empty Message in UI Frame
+--   @param uiFrame frame: UI frame containing _EmptyMessage child
+-----------------------------------------------------------------------------
+function AutoLFM.Core.Utils.ShowEmptyMessage(uiFrame)
+    if not uiFrame then return end
+
+    local emptyMsg = getglobal(uiFrame:GetName().."_EmptyMessage")
+    if emptyMsg then
+        emptyMsg:Show()
+    end
+end
+
+-----------------------------------------------------------------------------
+-- Hide Empty Message in UI Frame
+--   @param uiFrame frame: UI frame containing _EmptyMessage child
+-----------------------------------------------------------------------------
+function AutoLFM.Core.Utils.HideEmptyMessage(uiFrame)
+    if not uiFrame then return end
+
+    local emptyMsg = getglobal(uiFrame:GetName().."_EmptyMessage")
+    if emptyMsg then
+        emptyMsg:Hide()
+    end
+end
+
 --=============================================================================
 -- STRING UTILITIES
 --=============================================================================
@@ -113,19 +139,6 @@ end
 --=============================================================================
 
 -----------------------------------------------------------------------------
--- Convert RGB to Hex
---   @param r, g, b number: RGB values (0-1)
---   @return string: Hex color with alpha prefix (e.g. "ffff8040")
------------------------------------------------------------------------------
-function AutoLFM.Core.Utils.RGBToHex(r, g, b)
-    if not r or not g or not b then return "ff808080" end
-    return string.format("ff%02x%02x%02x",
-        math.floor(r * 255),
-        math.floor(g * 255),
-        math.floor(b * 255))
-end
-
------------------------------------------------------------------------------
 -- Colorize Text
 --   @param text string: Text to colorize
 --   @param colorKey string: Color name (e.g. "gold", "red")
@@ -182,6 +195,42 @@ function AutoLFM.Core.Utils.GetColor(identifier, returnRGBOnly)
     return color
 end
 
+-----------------------------------------------------------------------------
+-- Get Color Name from Color Object
+--   @param color table: Color object
+--   @return string: Color name (e.g., "GREEN", "YELLOW") or nil
+-----------------------------------------------------------------------------
+function AutoLFM.Core.Utils.GetColorName(color)
+    if not color then return nil end
+
+    -- Search through COLORS to find matching color object
+    for name, colorData in pairs(AutoLFM.Core.Constants.COLORS) do
+        if colorData == color then
+            return name
+        end
+    end
+
+    return nil
+end
+
+-----------------------------------------------------------------------------
+-- Convert RGB to Hex Color Code
+--   @param r number: Red (0.0-1.0)
+--   @param g number: Green (0.0-1.0)
+--   @param b number: Blue (0.0-1.0)
+--   @return string: Hex color code with "ff" prefix (e.g., "ffff0000" for red)
+-----------------------------------------------------------------------------
+function AutoLFM.Core.Utils.RGBToHex(r, g, b)
+    if not r or not g or not b then
+        return "ff808080" -- Gray fallback
+    end
+
+    return string.format("ff%02x%02x%02x",
+        math.floor(r * 255),
+        math.floor(g * 255),
+        math.floor(b * 255))
+end
+
 --=============================================================================
 -- LEVEL-BASED PRIORITY CALCULATION
 --=============================================================================
@@ -200,9 +249,10 @@ function AutoLFM.Core.Utils.CalculateLevelPriority(playerLevel, minLevel, maxLev
     if not playerLevel or not minLevel or not maxLevel then return 5 end
     if minLevel < 1 or maxLevel < 1 or minLevel > maxLevel then return 5 end
 
-    -- Get dynamic green threshold based on player level tier
+    -- Get dynamic green threshold based on player level tier (1-9: 4, 10-19: 5, 20-29: 6, 30-39: 7, 40+: 8)
     local thresholdIndex = math.min(math.floor(playerLevel / 10) + 1, 5)
-    local greenThreshold = AutoLFM.Core.Constants.GREEN_THRESHOLDS[thresholdIndex] or 8
+    local greenThresholds = {4, 5, 6, 7, 8}
+    local greenThreshold = greenThresholds[thresholdIndex] or 8
 
     -- Calculate level difference
     local diff
@@ -219,23 +269,6 @@ function AutoLFM.Core.Utils.CalculateLevelPriority(playerLevel, minLevel, maxLev
     if diff >= -2 then return 2 end         -- Yellow: -2 to +2 levels
     if diff >= -greenThreshold then return 1 end  -- Green: dynamic threshold
     return 5                                -- Gray: below green threshold
-end
-
---=============================================================================
--- FONT UTILITIES
---=============================================================================
-
------------------------------------------------------------------------------
--- Set Font String Color
---   @param fontString FontString: FontString to colorize
---   @param colorKey string|number|table: Color identifier
------------------------------------------------------------------------------
-function AutoLFM.Core.Utils.SetFontColor(fontString, colorKey)
-    if not fontString then return end
-    local color = AutoLFM.Core.Utils.GetColor(colorKey)
-    if color then
-        fontString:SetTextColor(color.r, color.g, color.b)
-    end
 end
 
 --=============================================================================

@@ -1,0 +1,60 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/">
+  <Script file="UI\Content\Dungeons.lua"/>
+
+  <!--==========================================================================
+    Dungeons Content Panel
+    ==========================================================================
+    Displays a list of all available dungeons with checkboxes
+    ==========================================================================-->
+  <Frame name="AutoLFM_Content_Dungeons" parent="AutoLFM_MainFrame_Content" hidden="true" virtual="true">
+    <Size>
+      <AbsDimension x="298" y="230"/>
+    </Size>
+    <Anchors>
+      <Anchor point="TOPLEFT"/>
+    </Anchors>
+    <Frames>
+      <!-- Dungeon Checkbox Template -->
+      <CheckButton name="AutoLFM_DungeonCheckbox_Template" virtual="true" inherits="UICheckButtonTemplate">
+        <Size>
+          <AbsDimension x="280" y="20"/>
+        </Size>
+        <Layers>
+          <Layer level="ARTWORK">
+            <FontString name="$parent_Label" inherits="GameFontNormalSmall" justifyH="LEFT">
+              <Size>
+                <AbsDimension x="260" y="20"/>
+              </Size>
+              <Anchors>
+                <Anchor point="LEFT">
+                  <Offset>
+                    <AbsDimension x="25" y="0"/>
+                  </Offset>
+                </Anchor>
+              </Anchors>
+            </FontString>
+          </Layer>
+        </Layers>
+        <Scripts>
+          <OnClick>
+            AutoLFM.UI.Content.Dungeons.OnDungeonToggle(this)
+          </OnClick>
+          <OnEnter>
+            AutoLFM.UI.Content.Dungeons.OnDungeonEnter(this)
+          </OnEnter>
+          <OnLeave>
+            GameTooltip:Hide()
+          </OnLeave>
+        </Scripts>
+      </CheckButton>
+    </Frames>
+    <Scripts>
+      <OnLoad>
+        AutoLFM.UI.Content.Dungeons.OnLoad(this)
+      </OnLoad>
+      <OnShow>
+        AutoLFM.UI.Content.Dungeons.OnShow(this)
+      </OnShow>
+    </Scripts>
+  </Frame>
+</Ui>

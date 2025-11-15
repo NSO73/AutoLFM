@@ -1,6 +1,6 @@
 --=============================================================================
--- AutoLFM: Maestro
---   Central command bus and event system with numeric IDs and metadata
+-- AutoLFM: Maestro System
+--   Minimal event bus and initialization system
 --=============================================================================
 
 AutoLFM = AutoLFM or {}
@@ -8,469 +8,214 @@ AutoLFM.Core = AutoLFM.Core or {}
 AutoLFM.Core.Maestro = AutoLFM.Core.Maestro or {}
 
 --=============================================================================
--- DEBUG MODE
+-- PRIVATE STATE
 --=============================================================================
 
-AutoLFM.Core.Maestro.DebugMode = false
+local commands = {}
+local commandsRegistry = {}  -- Stores {id, key, handler} with incremental IDs
+local commandCounter = 0
 
------------------------------------------------------------------------------
--- Logging Function (stub - will be implemented by Debug module)
------------------------------------------------------------------------------
-function AutoLFM.Core.Maestro.Log(category, message, details)
-    -- This will be overridden by Debug/DebugWindow.lua if debug mode is enabled
-    -- Default: do nothing
-end
+local initHandlers = {}
+local initRegistry = {}  -- Stores {id, key, handler} with incremental IDs
+local initCounter = 0
 
---=============================================================================
--- REGISTRY TABLES AND COUNTERS
---=============================================================================
-
-AutoLFM.Core.Maestro.CommandRegistry = {}
-AutoLFM.Core.Maestro.EventRegistry = {}
-AutoLFM.Core.Maestro.CommandKeyToId = {}
-AutoLFM.Core.Maestro.EventKeyToId = {}
-
-local nextCommandId = 1
-local nextEventId = 1
-local nextListenerId = 1
-
--- ID formatters
-local function FormatCommandId(num)
-    return "C" .. num
-end
-
-local function FormatEventId(num)
-    return "E" .. num
-end
-
-local function FormatListenerId(num)
-    return "L" .. num
-end
-
---=============================================================================
--- METADATA MANAGEMENT
---=============================================================================
-
------------------------------------------------------------------------------
--- Register Command Metadata (Internal)
---   @param metadata table: { key, description, handler }
------------------------------------------------------------------------------
-local function RegisterCommandMetadata(metadata)
-    if not metadata then
-        error("Maestro: RegisterCommandMetadata received nil metadata")
-        return
-    end
-    if type(metadata) ~= "table" then
-        error("Maestro: RegisterCommandMetadata received non-table metadata (type: " .. type(metadata) .. ")")
-        return
-    end
-    if not metadata.key then
-        error("Maestro: RegisterCommandMetadata missing 'key' field")
-        return
-    end
-    if not metadata.handler then
-        error("Maestro: RegisterCommandMetadata missing 'handler' field for key: " .. tostring(metadata.key))
-        return
-    end
-
-    local numericId = nextCommandId
-    local formattedId = FormatCommandId(numericId)
-    nextCommandId = nextCommandId + 1
-
-    AutoLFM.Core.Maestro.CommandRegistry[numericId] = {
-        id = formattedId,
-        key = metadata.key,
-        description = metadata.description or "No description",
-        handler = metadata.handler
-    }
-
-    AutoLFM.Core.Maestro.CommandKeyToId[metadata.key] = numericId
-end
-
------------------------------------------------------------------------------
--- Register Event Metadata (Internal)
---   @param metadata table: { key, description }
------------------------------------------------------------------------------
-local function RegisterEventMetadata(metadata)
-    if not metadata or not metadata.key then
-        error("Maestro: RegisterEventMetadata requires 'key'")
-        return
-    end
-
-    -- Check if already registered
-    if AutoLFM.Core.Maestro.EventKeyToId[metadata.key] then
-        return
-    end
-
-    local numericId = nextEventId
-    local formattedId = FormatEventId(numericId)
-    nextEventId = nextEventId + 1
-
-    AutoLFM.Core.Maestro.EventRegistry[numericId] = {
-        id = formattedId,
-        key = metadata.key,
-        description = metadata.description or "No description",
-        listeners = {}
-    }
-
-    AutoLFM.Core.Maestro.EventKeyToId[metadata.key] = numericId
-end
-
------------------------------------------------------------------------------
--- Register Event Listener with Metadata (Internal)
---   @param eventKey string: Event key identifier
---   @param listener function: Callback function
---   @param metadata table: { key, description } (optional)
------------------------------------------------------------------------------
-local function RegisterEventListenerMetadata(eventKey, listener, metadata)
-    if not eventKey or not listener then return end
-
-    -- Ensure event is registered
-    if not AutoLFM.Core.Maestro.EventKeyToId[eventKey] then
-        RegisterEventMetadata({ key = eventKey })
-    end
-
-    local eventId = AutoLFM.Core.Maestro.EventKeyToId[eventKey]
-    local numericId = nextListenerId
-    local formattedId = FormatListenerId(numericId)
-    nextListenerId = nextListenerId + 1
-
-    local listenerData = {
-        id = formattedId,
-        callback = listener,
-        key = (metadata and metadata.key) or ("Listener." .. formattedId),
-        description = (metadata and metadata.description) or "No description"
-    }
-
-    table.insert(AutoLFM.Core.Maestro.EventRegistry[eventId].listeners, listenerData)
-end
+local isInitialized = false
 
 --=============================================================================
 -- COMMAND BUS
 --=============================================================================
 
 -----------------------------------------------------------------------------
--- Register a Command
---   @param metadata table: { key, description, handler }
---
---   Example:
---   AutoLFM.Core.Maestro.RegisterCommand({
---       key = "roles.toggle",
---       description = "Toggle role selection",
---       handler = function(role) ... end
---   })
+-- Register Command
+--   @param key string: Command identifier (e.g., "ui.toggle")
+--   @param handler function: Function to execute
+--   @param options table: Optional config { silent = true/false }
+--   @return number: Assigned command ID
 -----------------------------------------------------------------------------
-function AutoLFM.Core.Maestro.RegisterCommand(metadata)
-    if not metadata then return end
+function AutoLFM.Core.Maestro.RegisterCommand(key, handler, options)
+    if commands[key] then
+        error("Maestro: Command '" .. key .. "' already registered")
+        return
+    end
+    commandCounter = commandCounter + 1
 
-    RegisterCommandMetadata(metadata)
+    local opts = options or {}
+    commands[key] = {
+        handler = handler,
+        silent = opts.silent or false
+    }
 
-    -- Log registration in debug mode
-    if AutoLFM.Core.Maestro.DebugMode then
-        local numericId = AutoLFM.Core.Maestro.CommandKeyToId[metadata.key]
-        local commandData = AutoLFM.Core.Maestro.CommandRegistry[numericId]
-        if commandData then
-            AutoLFM.Core.Maestro.Log("COMMAND", "Registered [" .. commandData.id .. "]: " .. metadata.key, metadata.description or "")
+    table.insert(commandsRegistry, {
+        id = commandCounter,
+        key = key,
+        handler = handler
+    })
+    return commandCounter
+end
+
+-----------------------------------------------------------------------------
+-- Dispatch Command
+--   @param key string: Command identifier
+--   @param ... any: Arguments to pass to handler
+-----------------------------------------------------------------------------
+function AutoLFM.Core.Maestro.Dispatch(key, ...)
+    local command = commands[key]
+    if not command then
+        error("Maestro: Unknown command '" .. key .. "'")
+        return
+    end
+
+    -- Log command execution to debug window (unless command is silent)
+    if not command.silent then
+        if AutoLFM.Components.DebugWindow and AutoLFM.Components.DebugWindow.LogCommand then
+            AutoLFM.Components.DebugWindow.LogCommand(key, unpack(arg))
         end
     end
-end
 
------------------------------------------------------------------------------
--- Dispatch a Command
---   @param commandKey string: Command key identifier
---   @param ... any: Arguments to pass to the command handler
---   @return any: Return value from handler
------------------------------------------------------------------------------
-function AutoLFM.Core.Maestro.Dispatch(commandKey, ...)
-    if not commandKey then return end
-
-    local commandId = AutoLFM.Core.Maestro.CommandKeyToId[commandKey]
-    if not commandId then
-        error("Maestro: Unknown command '" .. commandKey .. "'")
-        return
-    end
-
-    local commandMeta = AutoLFM.Core.Maestro.CommandRegistry[commandId]
-
-    -- Log to debug window if available
-    if AutoLFM.Debug and AutoLFM.Debug.DebugWindow and AutoLFM.Debug.DebugWindow.LogCommand then
-        AutoLFM.Debug.DebugWindow.LogCommand(commandKey, unpack(arg))
-    end
-
-    -- Execute handler (Lua 5.0: arg table is available)
-    local success, result = pcall(commandMeta.handler, unpack(arg))
-
+    local success, err = pcall(command.handler, unpack(arg))
     if not success then
-        error("Maestro: Error executing command '" .. commandKey .. "': " .. tostring(result))
+        if AutoLFM.Components.DebugWindow and AutoLFM.Components.DebugWindow.LogError then
+            AutoLFM.Components.DebugWindow.LogError("Command '" .. key .. "' failed: " .. tostring(err))
+        end
+        error("Maestro: Error executing command '" .. key .. "': " .. tostring(err))
+    end
+end
+
+--=============================================================================
+-- INITIALIZATION SYSTEM
+--=============================================================================
+
+-----------------------------------------------------------------------------
+-- Register Initialization Handler
+--   @param id string: Unique identifier
+--   @param handler function: Function to execute on init
+--   @return number: Assigned init handler ID
+-----------------------------------------------------------------------------
+function AutoLFM.Core.Maestro.RegisterInit(id, handler)
+    if initHandlers[id] then
+        error("Maestro: Init handler '" .. id .. "' already registered")
+        return
+    end
+    initCounter = initCounter + 1
+    initHandlers[id] = handler
+    table.insert(initRegistry, {
+        id = initCounter,
+        key = id,
+        handler = handler
+    })
+    return initCounter
+end
+
+-----------------------------------------------------------------------------
+-- Run All Initialization Handlers
+-----------------------------------------------------------------------------
+function AutoLFM.Core.Maestro.RunInit()
+    if isInitialized then
         return
     end
 
-    return result
-end
-
------------------------------------------------------------------------------
--- Check if a command is registered
---   @param commandKey string: Command key identifier
---   @return boolean: true if command exists
------------------------------------------------------------------------------
-function AutoLFM.Core.Maestro.HasCommand(commandKey)
-    if not commandKey then return false end
-    return AutoLFM.Core.Maestro.CommandKeyToId[commandKey] ~= nil
-end
-
---=============================================================================
--- EVENT BUS
---=============================================================================
-
------------------------------------------------------------------------------
--- Register Event (Public API)
---   Pre-register an event with description before any listeners
---   @param metadata table: { key, description }
---
---   Example:
---   AutoLFM.Core.Maestro.RegisterEvent({
---       key = "Dungeons.SelectionChanged",
---       description = "Fired when dungeon selection changes"
---   })
------------------------------------------------------------------------------
-function AutoLFM.Core.Maestro.RegisterEvent(metadata)
-    if not metadata then return end
-    RegisterEventMetadata(metadata)
-end
-
------------------------------------------------------------------------------
--- Register Event Listener
---   @param eventKey string: Event key identifier
---   @param listener function: Callback function
---   @param metadata table: { key, description } (optional)
---
---   Example:
---   AutoLFM.Core.Maestro.On("Roles.Toggled", function(role, isSelected)
---       -- Handle event
---   end, {
---       key = "update_role_button",
---       description = "Updates role button visual state"
---   })
------------------------------------------------------------------------------
-function AutoLFM.Core.Maestro.On(eventKey, listener, metadata)
-    if not eventKey or not listener then return end
-
-    RegisterEventListenerMetadata(eventKey, listener, metadata)
-
-    -- Log registration in debug mode
-    if AutoLFM.Core.Maestro.DebugMode then
-        local listenerKey = (metadata and metadata.key) or "anonymous"
-        AutoLFM.Core.Maestro.Log("EVENT", "Listener registered: " .. eventKey, listenerKey)
+    -- Sort handlers by ID for consistent order
+    local sorted = {}
+    for id, handler in pairs(initHandlers) do
+        table.insert(sorted, { id = id, handler = handler })
     end
-end
+    table.sort(sorted, function(a, b) return a.id < b.id end)
 
------------------------------------------------------------------------------
--- Emit an Event
---   @param eventKey string: Event key identifier
---   @param ... any: Arguments to pass to listeners
------------------------------------------------------------------------------
-function AutoLFM.Core.Maestro.Emit(eventKey, ...)
-    if not eventKey then return end
+    -- Execute handlers
+    for _, data in ipairs(sorted) do
+        -- Log init handler execution
+        if AutoLFM.Components.DebugWindow and AutoLFM.Components.DebugWindow.LogEvent then
+            AutoLFM.Components.DebugWindow.LogEvent("INIT_" .. data.id)
+        end
 
-    -- Ensure event is registered
-    if not AutoLFM.Core.Maestro.EventKeyToId[eventKey] then
-        RegisterEventMetadata({ key = eventKey })
-    end
-
-    local eventId = AutoLFM.Core.Maestro.EventKeyToId[eventKey]
-    local eventMeta = AutoLFM.Core.Maestro.EventRegistry[eventId]
-
-    -- Call all listeners (Lua 5.0: arg table is available)
-    if eventMeta and eventMeta.listeners then
-        for i, listenerData in ipairs(eventMeta.listeners) do
-            if listenerData and listenerData.callback then
-                local success, err = pcall(listenerData.callback, unpack(arg))
-                if not success then
-                    error("Maestro: Error in listener '" .. (listenerData.key or "unknown") .. "' for event '" .. eventKey .. "': " .. tostring(err))
-                end
+        local success, err = pcall(data.handler)
+        if not success then
+            if AutoLFM.Components.DebugWindow and AutoLFM.Components.DebugWindow.LogError then
+                AutoLFM.Components.DebugWindow.LogError("Init handler '" .. data.id .. "' failed: " .. tostring(err))
             end
         end
     end
+
+    isInitialized = true
+    -- Only success message goes to chat
+    AutoLFM.Core.Common.PrintSuccess("Successfully loaded!")
 end
 
 -----------------------------------------------------------------------------
--- Check if an event has listeners
---   @param eventKey string: Event key identifier
---   @return boolean: true if event has at least one listener
+-- Print All Registered Commands (Debug Helper)
 -----------------------------------------------------------------------------
-function AutoLFM.Core.Maestro.HasListeners(eventKey)
-    if not eventKey then return false end
+function AutoLFM.Core.Maestro.PrintCommands()
+    if AutoLFM.Components.DebugWindow and AutoLFM.Components.DebugWindow.LogInfo then
+        AutoLFM.Components.DebugWindow.LogInfo("=== Registered Commands ===")
 
-    local eventId = AutoLFM.Core.Maestro.EventKeyToId[eventKey]
-    if not eventId then return false end
+        local sorted = {}
+        for key, _ in pairs(commands) do
+            table.insert(sorted, key)
+        end
+        table.sort(sorted)
 
-    local eventMeta = AutoLFM.Core.Maestro.EventRegistry[eventId]
-    return eventMeta ~= nil and eventMeta.listeners and table.getn(eventMeta.listeners) > 0
+        for _, key in ipairs(sorted) do
+            AutoLFM.Components.DebugWindow.LogInfo("  " .. key)
+        end
+
+        AutoLFM.Components.DebugWindow.LogInfo("Total: " .. table.getn(sorted) .. " commands")
+    end
 end
 
 -----------------------------------------------------------------------------
--- Get Listener Count for Event
---   @param eventKey string: Event key identifier
---   @return number: Number of listeners
+-- Check if addon is initialized
 -----------------------------------------------------------------------------
-function AutoLFM.Core.Maestro.GetListenerCount(eventKey)
-    if not eventKey then return 0 end
-
-    local eventId = AutoLFM.Core.Maestro.EventKeyToId[eventKey]
-    if not eventId then return 0 end
-
-    local eventMeta = AutoLFM.Core.Maestro.EventRegistry[eventId]
-    if not eventMeta or not eventMeta.listeners then return 0 end
-    return table.getn(eventMeta.listeners)
+function AutoLFM.Core.Maestro.IsInitialized()
+    return isInitialized
 end
 
 --=============================================================================
--- INTROSPECTION (For Debug Tools)
+-- REGISTRY LISTING FUNCTIONS
 --=============================================================================
 
 -----------------------------------------------------------------------------
--- Get Command Metadata by Key
---   @param commandKey string: Command key identifier
---   @return table: Command metadata or nil
+-- Get All Registered Commands
+--   @return table: Array of {id, key, handler}
 -----------------------------------------------------------------------------
-function AutoLFM.Core.Maestro.GetCommandMetadata(commandKey)
-    if not commandKey then return nil end
-
-    local commandId = AutoLFM.Core.Maestro.CommandKeyToId[commandKey]
-    if not commandId then return nil end
-
-    return AutoLFM.Core.Maestro.CommandRegistry[commandId]
+function AutoLFM.Core.Maestro.GetCommands()
+    return commandsRegistry
 end
 
 -----------------------------------------------------------------------------
--- Get Command Metadata by ID
---   @param commandId number: Command numeric ID
---   @return table: Command metadata or nil
+-- Get All Registered Init Handlers
+--   @return table: Array of {id, key, handler}
 -----------------------------------------------------------------------------
-function AutoLFM.Core.Maestro.GetCommandMetadataById(commandId)
-    if not commandId then return nil end
-    return AutoLFM.Core.Maestro.CommandRegistry[commandId]
+function AutoLFM.Core.Maestro.GetInitHandlers()
+    return initRegistry
 end
 
 -----------------------------------------------------------------------------
--- Get Event Metadata by Key
---   @param eventKey string: Event key identifier
---   @return table: Event metadata or nil
+-- Print All Registered Commands
 -----------------------------------------------------------------------------
-function AutoLFM.Core.Maestro.GetEventMetadata(eventKey)
-    if not eventKey then return nil end
-
-    local eventId = AutoLFM.Core.Maestro.EventKeyToId[eventKey]
-    if not eventId then return nil end
-
-    return AutoLFM.Core.Maestro.EventRegistry[eventId]
-end
-
------------------------------------------------------------------------------
--- Get Event Metadata by ID
---   @param eventId number: Event numeric ID
---   @return table: Event metadata or nil
------------------------------------------------------------------------------
-function AutoLFM.Core.Maestro.GetEventMetadataById(eventId)
-    if not eventId then return nil end
-    return AutoLFM.Core.Maestro.EventRegistry[eventId]
-end
-
------------------------------------------------------------------------------
--- Get All Commands (sorted by ID)
---   @return table: All registered commands
------------------------------------------------------------------------------
-function AutoLFM.Core.Maestro.GetAllCommands()
-    local commands = {}
-    for numericId, metadata in pairs(AutoLFM.Core.Maestro.CommandRegistry) do
-        if metadata then
-            table.insert(commands, {
-                numericId = numericId,
-                id = metadata.id,
-                key = metadata.key,
-                description = metadata.description
-            })
-        end
+function AutoLFM.Core.Maestro.ListCommands()
+    AutoLFM.Core.Common.PrintTitle("Registered Commands (" .. commandCounter .. " total):")
+    for i = 1, table.getn(commandsRegistry) do
+        local entry = commandsRegistry[i]
+        AutoLFM.Core.Common.PrintInfo("[" .. entry.id .. "] " .. entry.key)
     end
-    table.sort(commands, function(a, b) return a.numericId < b.numericId end)
-    return commands
 end
 
 -----------------------------------------------------------------------------
--- Get All Events (sorted by ID)
---   @return table: All registered events
+-- Print All Registered Init Handlers
 -----------------------------------------------------------------------------
-function AutoLFM.Core.Maestro.GetAllEvents()
-    local events = {}
-    for numericId, metadata in pairs(AutoLFM.Core.Maestro.EventRegistry) do
-        if metadata then
-            table.insert(events, {
-                numericId = numericId,
-                id = metadata.id,
-                key = metadata.key,
-                description = metadata.description,
-                listenerCount = (metadata.listeners and table.getn(metadata.listeners)) or 0
-            })
-        end
+function AutoLFM.Core.Maestro.ListInitHandlers()
+    AutoLFM.Core.Common.PrintTitle("Registered Init Handlers (" .. initCounter .. " total):")
+    for i = 1, table.getn(initRegistry) do
+        local entry = initRegistry[i]
+        AutoLFM.Core.Common.PrintInfo("[" .. entry.id .. "] " .. entry.key)
     end
-    table.sort(events, function(a, b) return a.numericId < b.numericId end)
-    return events
 end
 
 -----------------------------------------------------------------------------
--- Get Event Listeners
---   @param eventKey string: Event key identifier
---   @return table: List of listeners with metadata
+-- Print All Registered Items (Commands + Init Handlers)
 -----------------------------------------------------------------------------
-function AutoLFM.Core.Maestro.GetEventListeners(eventKey)
-    if not eventKey then return {} end
-
-    local eventId = AutoLFM.Core.Maestro.EventKeyToId[eventKey]
-    if not eventId then return {} end
-
-    local event = AutoLFM.Core.Maestro.EventRegistry[eventId]
-    if not event or not event.listeners then return {} end
-
-    local listeners = {}
-    for i, listenerData in ipairs(event.listeners) do
-        if listenerData then
-            table.insert(listeners, {
-                id = listenerData.id,
-                index = i,
-                key = listenerData.key,
-                description = listenerData.description
-            })
-        end
-    end
-    return listeners
-end
-
------------------------------------------------------------------------------
--- Get Statistics
---   @return table: Registry statistics
------------------------------------------------------------------------------
-function AutoLFM.Core.Maestro.GetStats()
-    local commandCount = 0
-    local eventCount = 0
-    local listenerCount = 0
-
-    for _ in pairs(AutoLFM.Core.Maestro.CommandRegistry) do
-        commandCount = commandCount + 1
-    end
-
-    for _, event in pairs(AutoLFM.Core.Maestro.EventRegistry) do
-        eventCount = eventCount + 1
-        if event.listeners then
-            listenerCount = listenerCount + table.getn(event.listeners)
-        end
-    end
-
-    return {
-        commands = commandCount,
-        events = eventCount,
-        listeners = listenerCount,
-        nextCommandId = nextCommandId,
-        nextEventId = nextEventId,
-        nextListenerId = nextListenerId
-    }
+function AutoLFM.Core.Maestro.ListAll()
+    AutoLFM.Core.Maestro.ListCommands()
+    AutoLFM.Core.Common.Print(" ")
+    AutoLFM.Core.Maestro.ListInitHandlers()
 end

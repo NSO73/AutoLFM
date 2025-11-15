@@ -20,7 +20,9 @@ function AutoLFM.Logic.Selection.OnDungeonChecked(dungeonIndex)
     if not dungeonIndex then return end
 
     -- Uncheck all raids (dungeons and raids are mutually exclusive)
-    AutoLFM.Core.Maestro.Dispatch("Raids.DeselectAll")
+    if AutoLFM.Logic.Content.Raids and AutoLFM.Logic.Content.Raids.DeselectAll then
+        AutoLFM.Logic.Content.Raids.DeselectAll()
+    end
 
     -- Get selection order from Dungeons module
     local selectionOrder = {}
@@ -34,8 +36,10 @@ function AutoLFM.Logic.Selection.OnDungeonChecked(dungeonIndex)
     if table.getn(selectionOrder) > AutoLFM.Core.Constants.MAX_DUNGEONS then
         local oldestIndex = table.remove(selectionOrder, 1)
 
-        -- Deselect via command
-        AutoLFM.Core.Maestro.Dispatch("Dungeons.Deselect", oldestIndex)
+        -- Deselect directly
+        if AutoLFM.Logic.Content.Dungeons and AutoLFM.Logic.Content.Dungeons.Deselect then
+            AutoLFM.Logic.Content.Dungeons.Deselect(oldestIndex)
+        end
 
         -- Find and uncheck the oldest dungeon checkbox (prevent OnClick from firing)
         local checkbox = AutoLFM.Logic.Selection.FindDungeonCheckbox(oldestIndex)
@@ -79,7 +83,9 @@ function AutoLFM.Logic.Selection.OnRaidChecked(raidIndex)
     if not raidIndex then return end
 
     -- Uncheck all dungeons (dungeons and raids are mutually exclusive)
-    AutoLFM.Core.Maestro.Dispatch("Dungeons.DeselectAll")
+    if AutoLFM.Logic.Content.Dungeons and AutoLFM.Logic.Content.Dungeons.DeselectAll then
+        AutoLFM.Logic.Content.Dungeons.DeselectAll()
+    end
 
     -- Get selection order from Raids module
     local selectionOrder = {}
@@ -91,8 +97,10 @@ function AutoLFM.Logic.Selection.OnRaidChecked(raidIndex)
     if table.getn(selectionOrder) > 0 then
         local oldRaidIndex = selectionOrder[1]
 
-        -- Deselect via command
-        AutoLFM.Core.Maestro.Dispatch("Raids.Deselect", oldRaidIndex)
+        -- Deselect directly
+        if AutoLFM.Logic.Content.Raids and AutoLFM.Logic.Content.Raids.Deselect then
+            AutoLFM.Logic.Content.Raids.Deselect(oldRaidIndex)
+        end
 
         -- Find and uncheck the old raid checkbox (prevent OnClick from firing)
         local checkbox = AutoLFM.Logic.Selection.FindRaidCheckbox(oldRaidIndex)
@@ -297,35 +305,23 @@ end
 -- Clear All Selection (Dungeons, Raids, Quests, Roles, Message)
 -----------------------------------------------------------------------------
 function AutoLFM.Logic.Selection.ClearAll()
-    -- Use optimized DeselectAll commands (single event per category instead of N events)
-    AutoLFM.Core.Maestro.Dispatch("Dungeons.DeselectAll")
-    AutoLFM.Core.Maestro.Dispatch("Raids.DeselectAll")
-    AutoLFM.Core.Maestro.Dispatch("Quests.DeselectAll")
-    AutoLFM.Core.Maestro.Dispatch("Roles.DeselectAll")
+    -- Deselect all directly
+    if AutoLFM.Logic.Content.Dungeons and AutoLFM.Logic.Content.Dungeons.DeselectAll then
+        AutoLFM.Logic.Content.Dungeons.DeselectAll()
+    end
+
+    if AutoLFM.Logic.Content.Raids and AutoLFM.Logic.Content.Raids.DeselectAll then
+        AutoLFM.Logic.Content.Raids.DeselectAll()
+    end
+
+    if AutoLFM.Logic.Roles and AutoLFM.Logic.Roles.DeselectAll then
+        AutoLFM.Logic.Roles.DeselectAll()
+    end
 
     -- Clear custom broadcast message
-    -- The UI will update automatically via broadcasts.custom_message_changed event listener
-    AutoLFM.Core.Maestro.Dispatch("Broadcasts.SetCustomMessage", "")
-end
-
---=============================================================================
--- COMMANDS
---=============================================================================
-
------------------------------------------------------------------------------
--- Register Command Handlers
------------------------------------------------------------------------------
-function AutoLFM.Logic.Selection.RegisterCommands()
-    -- Clear all command
-    AutoLFM.Core.Maestro.RegisterCommand({
-        key = "Selection.ClearAll",
-        description = "Clears all selections (dungeons, raids, quests, roles, message)",
-        handler = function()
-            AutoLFM.Logic.Selection.ClearAll()
-            -- Emit a final event after everything is cleared
-            AutoLFM.Core.Maestro.Emit("Selection.AllCleared")
-        end
-    })
+    if AutoLFM.Logic.Content.Broadcasts and AutoLFM.Logic.Content.Broadcasts.SetCustomMessage then
+        AutoLFM.Logic.Content.Broadcasts.SetCustomMessage("")
+    end
 end
 
 --=============================================================================
@@ -336,8 +332,8 @@ end
 -- Auto-register initialization
 -----------------------------------------------------------------------------
 AutoLFM.Core.Maestro.RegisterInit("selection.init", function()
-    AutoLFM.Logic.Selection.RegisterCommands()
+    -- Selection module initialized
 end, {
     name = "Selection Constraints",
-    description = "Register selection constraint management commands"
+    description = "Selection constraint management"
 })

@@ -80,9 +80,6 @@ local function OnGroupRosterChange()
     if currentSize ~= lastGroupSize then
         lastGroupSize = currentSize
 
-        -- Emit group changed event
-        AutoLFM.Core.Maestro.Emit("Group.Changed", currentSize)
-
         -- Update message preview
         if AutoLFM.Logic and AutoLFM.Logic.Message and AutoLFM.Logic.Message.UpdatePreview then
             AutoLFM.Logic.Message.UpdatePreview()
@@ -98,14 +95,12 @@ local function OnGroupRosterChange()
                 local raidSize = AutoLFM.Logic.Content.Raids.GetRaidSize(raid.index) or raid.sizeMin or AutoLFM.Core.Constants.GROUP_SIZE_RAID
 
                 if currentSize >= raidSize then
-                    AutoLFM.Core.Maestro.Emit("Group.Full", "raid", currentSize, raidSize)
                     if AutoLFM.Logic.Broadcaster and AutoLFM.Logic.Broadcaster.HandleGroupFull then
                         AutoLFM.Logic.Broadcaster.HandleGroupFull()
                     end
                 end
             elseif selectedDungeons and table.getn(selectedDungeons) > 0 then
                 if currentSize >= AutoLFM.Core.Constants.GROUP_SIZE_DUNGEON then
-                    AutoLFM.Core.Maestro.Emit("Group.Full", "dungeon", currentSize, AutoLFM.Core.Constants.GROUP_SIZE_DUNGEON)
                     if AutoLFM.Logic.Broadcaster and AutoLFM.Logic.Broadcaster.HandleGroupFull then
                         AutoLFM.Logic.Broadcaster.HandleGroupFull()
                     end

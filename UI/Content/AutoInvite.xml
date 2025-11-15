@@ -1,9 +1,9 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/">
 
   <!--==========================================================================
-    Broadcasts Content Panel
+    AutoInvite Content Panel
     ==========================================================================-->
-  <Frame name="AutoLFM_Content_Broadcasts" virtual="true">
+  <Frame name="AutoLFM_Content_AutoInvite" virtual="true">
     <Size>
       <AbsDimension x="298" y="252"/>
     </Size>
@@ -22,7 +22,7 @@
         </Texture>
       </Layer>
       <Layer level="ARTWORK">
-        <FontString inherits="GameFontHighlightLarge" text="Broadcasts">
+        <FontString inherits="GameFontHighlightLarge" text="AutoInvite">
           <Anchors>
             <Anchor point="TOP">
               <Offset>
@@ -31,7 +31,7 @@
             </Anchor>
           </Anchors>
         </FontString>
-        <FontString inherits="GameFontNormalSmall" text="Manage broadcast messages">
+        <FontString inherits="GameFontNormalSmall" text="Automatic invitation settings">
           <Anchors>
             <Anchor point="TOP">
               <Offset>
@@ -41,7 +41,7 @@
           </Anchors>
           <Color r="0.7" g="0.7" b="0.7"/>
         </FontString>
-        <FontString inherits="GameFontNormal" text="[PLACEHOLDER: Broadcasts Content]">
+        <FontString inherits="GameFontNormal" text="[PLACEHOLDER: AutoInvite Content]">
           <Anchors>
             <Anchor point="CENTER"/>
           </Anchors>

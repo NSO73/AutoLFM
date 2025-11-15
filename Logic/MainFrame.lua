@@ -1,258 +1,38 @@
 --=============================================================================
--- AutoLFM: MainFrame
---   Main window management, tab switching, and content display
+-- AutoLFM: MainFrame Logic
+--   Main window and tab management
 --=============================================================================
 
 AutoLFM = AutoLFM or {}
 AutoLFM.Logic = AutoLFM.Logic or {}
-AutoLFM.Logic.MainFrame = AutoLFM.Logic.MainFrame or {}
+AutoLFM.Logic.MainFrame = {}
 
 --=============================================================================
 -- PRIVATE STATE
 --=============================================================================
 
-local currentBottomTab = 1
-local currentLineTab = 0
-local contentFrames = {}
+local Debug = AutoLFM.Components.DebugWindow
 
--- Content panel mapping
-local BOTTOM_TAB_CONTENT = {
+local currentBottomTab = 1  -- 1=Dungeons, 2=Raids, 3=Quests, 4=Broadcasts
+local currentSideTab = nil  -- nil or 2=Presets, 4=AutoInvite, 5=Options
+
+-- Tab content mapping
+local BOTTOM_TABS = {
     "Dungeons",
     "Raids",
     "Quests",
     "Broadcasts"
 }
 
-local LINE_TAB_CONTENT = {
-    [1] = "Presets",
-    [4] = "Options",
-    [5] = "AutoInvite"  -- Special case
+local SIDE_TABS = {
+    [2] = "Presets",
+    [4] = "AutoInvite",
+    [5] = "Options"
 }
-
---=============================================================================
--- CONTENT FRAME MANAGEMENT
---=============================================================================
-
------------------------------------------------------------------------------
--- Initialize Content Frames
------------------------------------------------------------------------------
-function AutoLFM.Logic.MainFrame.InitializeContentFrames()
-    local parent = getglobal("AutoLFM_MainFrame_Content")
-    if not parent then
-        AutoLFM.Core.Utils.PrintError("MainFrame: Content parent not found")
-        return
-    end
-
-    -- Create all content frames
-    for _, contentName in ipairs(BOTTOM_TAB_CONTENT) do
-        local templateName = "AutoLFM_Content_" .. contentName
-        local frameName = "AutoLFM_MainFrame_Content_" .. contentName
-
-        -- Create frame from template
-        local contentFrame = CreateFrame("Frame", frameName, parent, templateName)
-        contentFrame:SetAllPoints(parent)
-        contentFrame:Hide()
-
-        contentFrames[contentName] = contentFrame
-    end
-
-    -- Create line tab content frames
-    for tabId, contentName in pairs(LINE_TAB_CONTENT) do
-        if contentName ~= "AutoInvite" then
-            local templateName = "AutoLFM_Content_" .. contentName
-            local frameName = "AutoLFM_MainFrame_Content_" .. contentName
-
-            if not contentFrames[contentName] then
-                local contentFrame = CreateFrame("Frame", frameName, parent, templateName)
-                contentFrame:SetAllPoints(parent)
-                contentFrame:Hide()
-
-                contentFrames[contentName] = contentFrame
-            end
-        end
-    end
-end
-
---=============================================================================
--- TAB SELECTION
---=============================================================================
-
------------------------------------------------------------------------------
--- Select Bottom Tab
------------------------------------------------------------------------------
-function AutoLFM.Logic.MainFrame.SelectBottomTab(tabId)
-    if tabId == currentBottomTab and currentLineTab == 0 then
-        return
-    end
-
-    currentBottomTab = tabId
-    currentLineTab = 0
-
-    -- Update tab visuals
-    AutoLFM.Logic.MainFrame.UpdateBottomTabVisuals(tabId)
-
-    -- Uncheck all line tabs
-    AutoLFM.Logic.MainFrame.UncheckAllLineTabs()
-
-    -- Show appropriate content
-    local contentName = BOTTOM_TAB_CONTENT[tabId]
-    AutoLFM.Logic.MainFrame.ShowContent(contentName)
-
-    -- Emit event
-    AutoLFM.Core.Maestro.Emit("UI.BottomTab.Selected", tabId, contentName)
-end
-
------------------------------------------------------------------------------
--- Select Line Tab
------------------------------------------------------------------------------
-function AutoLFM.Logic.MainFrame.SelectLineTab(tabId)
-    if tabId == currentLineTab then
-        -- Uncheck and return to current bottom tab
-        currentLineTab = 0
-        AutoLFM.Logic.MainFrame.SelectBottomTab(currentBottomTab)
-        return
-    end
-
-    currentLineTab = tabId
-
-    -- Update line tab visuals
-    AutoLFM.Logic.MainFrame.UpdateLineTabVisuals(tabId)
-
-    -- Show appropriate content
-    local contentName = LINE_TAB_CONTENT[tabId]
-    if contentName then
-        AutoLFM.Logic.MainFrame.ShowContent(contentName)
-
-        -- Dispatch event
-        AutoLFM.Core.Maestro.Dispatch("UI.LineTab.Selected", tabId, contentName)
-    end
-end
-
---=============================================================================
--- VISUAL UPDATES
---=============================================================================
-
------------------------------------------------------------------------------
--- Update Bottom Tab Visuals
------------------------------------------------------------------------------
-function AutoLFM.Logic.MainFrame.UpdateBottomTabVisuals(selectedTab)
-    for i = 1, 4 do
-        local tab = getglobal("AutoLFM_MainFrame_Tab" .. i)
-        if tab then
-            local bg = tab:GetRegions()
-            local highlight = getglobal(tab:GetName() .. "_Highlight")
-
-            if i == selectedTab then
-                -- Active tab
-                if bg then
-                    bg:SetTexture(AutoLFM.Core.Constants.TEXTURE_PATH .. "Tabs\\BottomTabActive")
-                end
-                if highlight then
-                    highlight:Hide()
-                end
-
-                -- Update text color
-                local _, _, _, _, text = tab:GetRegions()
-                if text then
-                    text:SetTextColor(1, 1, 1)
-                end
-            else
-                -- Inactive tab
-                if bg then
-                    bg:SetTexture(AutoLFM.Core.Constants.TEXTURE_PATH .. "Tabs\\BottomTabInactive")
-                end
-
-                -- Update text color
-                local _, _, _, _, text = tab:GetRegions()
-                if text then
-                    text:SetTextColor(1, 0.82, 0)
-                end
-            end
-        end
-    end
-end
-
------------------------------------------------------------------------------
--- Update Line Tab Visuals
------------------------------------------------------------------------------
-function AutoLFM.Logic.MainFrame.UpdateLineTabVisuals(selectedTab)
-    -- Uncheck all line tabs first
-    AutoLFM.Logic.MainFrame.UncheckAllLineTabs()
-
-    -- Check the selected tab
-    local tab = getglobal("AutoLFM_MainFrame_LineTab" .. selectedTab)
-    if tab and tab.SetChecked then
-        tab:SetChecked(1)
-    end
-end
-
------------------------------------------------------------------------------
--- Uncheck All Line Tabs
------------------------------------------------------------------------------
-function AutoLFM.Logic.MainFrame.UncheckAllLineTabs()
-    for _, tabId in ipairs({1, 2, 4, 5}) do
-        local tab = getglobal("AutoLFM_MainFrame_LineTab" .. tabId)
-        if tab and tab.SetChecked then
-            tab:SetChecked(nil)
-        end
-    end
-end
-
---=============================================================================
--- CONTENT DISPLAY
---=============================================================================
-
------------------------------------------------------------------------------
--- Show Content
------------------------------------------------------------------------------
-function AutoLFM.Logic.MainFrame.ShowContent(contentName)
-    -- Hide all content frames
-    for _, frame in pairs(contentFrames) do
-        frame:Hide()
-    end
-
-    -- Show selected content
-    local frame = contentFrames[contentName]
-    if frame then
-        frame:Show()
-    end
-end
-
------------------------------------------------------------------------------
--- Refresh Current Content
------------------------------------------------------------------------------
-function AutoLFM.Logic.MainFrame.RefreshCurrentContent()
-    -- Emit refresh for current content
-    if currentLineTab > 0 then
-        local contentName = LINE_TAB_CONTENT[currentLineTab]
-        if contentName then
-            AutoLFM.Core.Maestro.Emit("UI.Content.Refresh", contentName)
-        end
-    else
-        local contentName = BOTTOM_TAB_CONTENT[currentBottomTab]
-        if contentName then
-            AutoLFM.Core.Maestro.Emit("UI.Content.Refresh", contentName)
-        end
-    end
-end
 
 --=============================================================================
 -- PUBLIC API
 --=============================================================================
-
------------------------------------------------------------------------------
--- Toggle Main Frame
------------------------------------------------------------------------------
-function AutoLFM.Logic.MainFrame.Toggle()
-    local frame = getglobal("AutoLFM_MainFrame")
-    if frame then
-        if frame:IsVisible() then
-            HideUIPanel(frame)
-        else
-            ShowUIPanel(frame)
-        end
-    end
-end
 
 -----------------------------------------------------------------------------
 -- Show Main Frame
@@ -275,153 +55,279 @@ function AutoLFM.Logic.MainFrame.Hide()
 end
 
 -----------------------------------------------------------------------------
--- Update Start Button
+-- Toggle Main Frame
 -----------------------------------------------------------------------------
-function AutoLFM.Logic.MainFrame.UpdateStartButton(isRunning)
-    local button = getglobal("AutoLFM_MainFrame_MainButton")
-    if button then
-        if isRunning then
-            button:SetText("Stop")
-            button:Enable()
-        else
-            button:SetText("Start")
-            button:Enable()
+function AutoLFM.Logic.MainFrame.Toggle()
+    local frame = getglobal("AutoLFM_MainFrame")
+    if not frame then
+        return
+    end
+
+    if frame:IsVisible() then
+        AutoLFM.Logic.MainFrame.Hide()
+    else
+        AutoLFM.Logic.MainFrame.Show()
+    end
+end
+
+--=============================================================================
+-- TAB MANAGEMENT
+--=============================================================================
+
+-----------------------------------------------------------------------------
+-- Select Bottom Tab
+-----------------------------------------------------------------------------
+function AutoLFM.Logic.MainFrame.SelectBottomTab(tabIndex)
+    if tabIndex < 1 or tabIndex > 4 then
+        return
+    end
+
+    currentBottomTab = tabIndex
+    currentSideTab = nil
+
+    -- Log tab selection with name
+    Debug.LogAction("Show " .. BOTTOM_TABS[tabIndex] .. " content")
+
+    AutoLFM.Logic.MainFrame.UpdateTabVisuals()
+    AutoLFM.Logic.MainFrame.UpdateContent()
+end
+
+-----------------------------------------------------------------------------
+-- Select Side Tab
+-----------------------------------------------------------------------------
+function AutoLFM.Logic.MainFrame.SelectSideTab(tabIndex)
+    if not SIDE_TABS[tabIndex] then
+        return
+    end
+
+    -- No toggle - just select the tab
+    currentSideTab = tabIndex
+
+    -- Log tab selection with name
+    Debug.LogAction("Show " .. SIDE_TABS[tabIndex] .. " content")
+
+    AutoLFM.Logic.MainFrame.UpdateTabVisuals()
+    AutoLFM.Logic.MainFrame.UpdateContent()
+end
+
+-----------------------------------------------------------------------------
+-- Update Tab Visuals
+-----------------------------------------------------------------------------
+function AutoLFM.Logic.MainFrame.UpdateTabVisuals()
+    -- Update bottom tabs
+    for i = 1, 4 do
+        local tab = getglobal("AutoLFM_MainFrame_Tab" .. i)
+        if tab then
+            local bg = tab:GetRegions()
+            local highlight = getglobal(tab:GetName() .. "_Highlight")
+            local text = getglobal(tab:GetName() .. "_Text")
+
+            if i == currentBottomTab and not currentSideTab then
+                -- Active tab
+                if bg then
+                    bg:SetTexture("Interface\\AddOns\\AutoLFM3\\UI\\Textures\\Tabs\\BottomTabActive")
+                end
+                if highlight then
+                    highlight:Hide()
+                end
+                if text then
+                    text:SetTextColor(1, 1, 1)  -- White
+                end
+            else
+                -- Inactive tab
+                if bg then
+                    bg:SetTexture("Interface\\AddOns\\AutoLFM3\\UI\\Textures\\Tabs\\BottomTabInactive")
+                end
+                if highlight then
+                    highlight:Hide()  -- Cache le highlight par défaut
+                end
+                if text then
+                    text:SetTextColor(1, 0.82, 0)  -- Gold
+                end
+            end
+        end
+    end
+
+    -- Update side tabs
+    for _, tabIndex in ipairs({2, 4, 5}) do
+        local tab = getglobal("AutoLFM_MainFrame_SideTab" .. tabIndex)
+        if tab and tab.SetChecked then
+            if currentSideTab == tabIndex then
+                tab:SetChecked(1)
+            else
+                tab:SetChecked(nil)
+            end
         end
     end
 end
 
 -----------------------------------------------------------------------------
--- Update Message Preview
+-- Update Content Display
 -----------------------------------------------------------------------------
-function AutoLFM.Logic.MainFrame.UpdateMessagePreview(message)
-    local preview = getglobal("AutoLFM_MainFrame_MessagePreview_Text")
-    if preview then
-        if message and message ~= "" then
-            preview:SetText(message)
+function AutoLFM.Logic.MainFrame.UpdateContent()
+    -- Determine active content
+    local activeContent
+    if currentSideTab and SIDE_TABS[currentSideTab] then
+        activeContent = SIDE_TABS[currentSideTab]
+    else
+        activeContent = BOTTOM_TABS[currentBottomTab]
+    end
 
-            -- Show preview button
-            local button = getglobal("AutoLFM_MainFrame_MessagePreview_Button")
-            if button then
-                button:Show()
-            end
-        else
-            preview:SetText("")
-
-            -- Hide preview button
-            local button = getglobal("AutoLFM_MainFrame_MessagePreview_Button")
-            if button then
-                button:Hide()
-            end
+    -- Hide all content frames
+    for _, contentName in ipairs(BOTTOM_TABS) do
+        local frame = getglobal("AutoLFM_MainFrameContent_" .. contentName)
+        if frame then
+            frame:Hide()
         end
+    end
+
+    for _, contentName in pairs(SIDE_TABS) do
+        local frame = getglobal("AutoLFM_MainFrameContent_" .. contentName)
+        if frame then
+            frame:Hide()
+        end
+    end
+
+    -- Show active content frame
+    local activeFrame = getglobal("AutoLFM_MainFrameContent_" .. activeContent)
+    if activeFrame then
+        activeFrame:Show()
+        Debug.LogInfo("Showing content frame: " .. activeContent)
+    else
+        Debug.LogWarning("Content frame not found: " .. activeContent)
     end
 end
 
 --=============================================================================
--- COMMANDS
+-- BUTTON ACTIONS
 --=============================================================================
 
 -----------------------------------------------------------------------------
--- Register Command Handlers
+-- Clear All Action
 -----------------------------------------------------------------------------
-function AutoLFM.Logic.MainFrame.RegisterCommands()
-    -- Toggle main frame
-    AutoLFM.Core.Maestro.RegisterCommand({
-        key = "MainFrame.Toggle",
-        description = "Toggle main frame visibility",
-        handler = function()
-            AutoLFM.Logic.MainFrame.Toggle()
-        end
-    })
+function AutoLFM.Logic.MainFrame.ClearAll()
+    -- TODO: Implement clear all logic
+    Debug.LogWarning("Clear All - Not implemented yet")
+end
 
-    -- Show main frame
-    AutoLFM.Core.Maestro.RegisterCommand({
-        key = "MainFrame.Show",
-        description = "Show main frame",
-        handler = function()
-            AutoLFM.Logic.MainFrame.Show()
-        end
-    })
-
-    -- Hide main frame
-    AutoLFM.Core.Maestro.RegisterCommand({
-        key = "MainFrame.Hide",
-        description = "Hide main frame",
-        handler = function()
-            AutoLFM.Logic.MainFrame.Hide()
-        end
-    })
+-----------------------------------------------------------------------------
+-- Add Preset Action
+-----------------------------------------------------------------------------
+function AutoLFM.Logic.MainFrame.AddPreset()
+    -- TODO: Implement add preset logic
+    Debug.LogWarning("Add Preset - Not implemented yet")
 end
 
 --=============================================================================
--- EVENT LISTENERS
+-- CONTENT FRAME MANAGEMENT
 --=============================================================================
 
 -----------------------------------------------------------------------------
--- Register Event Listeners
+-- Initialize Content Frames
 -----------------------------------------------------------------------------
-function AutoLFM.Logic.MainFrame.RegisterEventListeners()
-    -- Listen for broadcast state changes
-    AutoLFM.Core.Maestro.On("Broadcaster.StateChanged", function(isRunning)
-        AutoLFM.Logic.MainFrame.UpdateStartButton(isRunning)
-    end, {
-        key = "MainFrame.UpdateStartButton",
-        description = "Update start/stop button based on broadcast state"
-    })
+function AutoLFM.Logic.MainFrame.InitializeContentFrames()
+    local container = getglobal("AutoLFM_MainFrame_ContentContainer")
+    if not container then
+        if AutoLFM.Components.DebugWindow and AutoLFM.Components.DebugWindow.LogError then
+            AutoLFM.Components.DebugWindow.LogError("MainFrame: ContentContainer not found")
+        end
+        return
+    end
 
-    -- Listen for message preview updates
-    AutoLFM.Core.Maestro.On("Messages.PreviewUpdated", function(message)
-        AutoLFM.Logic.MainFrame.UpdateMessagePreview(message)
-    end, {
-        key = "Messages.UpdatePreview",
-        description = "Update message preview display"
-    })
+    -- List of all content frames to create
+    local contentNames = {
+        "Dungeons",
+        "Raids",
+        "Quests",
+        "Broadcasts",
+        "Presets",
+        "Options",
+        "AutoInvite"
+    }
+
+    -- Create content frames from virtual templates
+    for _, contentName in ipairs(contentNames) do
+        local templateName = "AutoLFM_Content_" .. contentName
+        local frameName = "AutoLFM_MainFrameContent_" .. contentName
+
+        -- Create frame from template
+        local contentFrame = CreateFrame("Frame", frameName, container, templateName)
+        if contentFrame then
+            contentFrame:SetAllPoints(container)
+            contentFrame:Hide()
+            if AutoLFM.Components.DebugWindow and AutoLFM.Components.DebugWindow.LogInfo then
+                AutoLFM.Components.DebugWindow.LogInfo("Created content frame: " .. contentName)
+            end
+        else
+            if AutoLFM.Components.DebugWindow and AutoLFM.Components.DebugWindow.LogError then
+                AutoLFM.Components.DebugWindow.LogError("Failed to create content frame: " .. contentName)
+            end
+        end
+    end
+
+    -- Show default content (Dungeons)
+    AutoLFM.Logic.MainFrame.UpdateContent()
+    AutoLFM.Logic.MainFrame.UpdateTabVisuals()
 end
 
 --=============================================================================
--- UI HANDLERS
+-- UI HANDLERS (for XML callbacks)
 --=============================================================================
 
--- Create UI namespace for XML callbacks
 AutoLFM.UI = AutoLFM.UI or {}
-AutoLFM.UI.MainFrame = AutoLFM.UI.MainFrame or {}
+AutoLFM.UI.MainFrame = {}
 
-local MainFrameUI = AutoLFM.UI.MainFrame
+function AutoLFM.UI.MainFrame.OnLoad(frame)
+    -- Setup UI panel
+    UIPanelWindows[frame:GetName()] = { area = "left", pushable = 1 }
+    tinsert(UISpecialFrames, frame:GetName())
 
------------------------------------------------------------------------------
--- UI Lifecycle
------------------------------------------------------------------------------
-function MainFrameUI.OnLoad(frame)
     -- Initialize content frames
     AutoLFM.Logic.MainFrame.InitializeContentFrames()
-
-    -- Show default tab
-    AutoLFM.Logic.MainFrame.SelectBottomTab(1)
 end
 
-function MainFrameUI.OnShow(frame)
-    -- Refresh current content
-    AutoLFM.Logic.MainFrame.RefreshCurrentContent()
-
-    -- Emit show event
-    AutoLFM.Core.Maestro.Emit("UI.MainFrame.Shown")
+function AutoLFM.UI.MainFrame.OnShow(frame)
+    PlaySound("GAMEDIALOGOPEN")
 end
 
-function MainFrameUI.OnHide(frame)
-    -- Emit hide event
-    AutoLFM.Core.Maestro.Emit("UI.MainFrame.Hidden")
+function AutoLFM.UI.MainFrame.OnHide(frame)
+    PlaySound("GAMEDIALOGCLOSE")
+end
+
+function AutoLFM.UI.MainFrame.OnBottomTabEnter(tabIndex)
+    -- Only show highlight if tab is not active or if a side tab is selected
+    if tabIndex ~= currentBottomTab or currentSideTab then
+        local tab = getglobal("AutoLFM_MainFrame_Tab" .. tabIndex)
+        if tab then
+            local highlight = getglobal(tab:GetName() .. "_Highlight")
+            if highlight then
+                highlight:Show()
+            end
+        end
+    end
+end
+
+function AutoLFM.UI.MainFrame.OnBottomTabLeave(tabIndex)
+    local tab = getglobal("AutoLFM_MainFrame_Tab" .. tabIndex)
+    if tab then
+        local highlight = getglobal(tab:GetName() .. "_Highlight")
+        if highlight then
+            highlight:Hide()
+        end
+    end
 end
 
 --=============================================================================
 -- INITIALIZATION
 --=============================================================================
 
------------------------------------------------------------------------------
--- Auto-register initialization
------------------------------------------------------------------------------
-AutoLFM.Core.Maestro.RegisterInit("mainframe.init", function()
-    AutoLFM.Logic.MainFrame.RegisterCommands()
-    AutoLFM.Logic.MainFrame.RegisterEventListeners()
-end, {
-    key = "MainFrame.Init",
-    description = "Initialize main frame commands and event listeners"
-})
+AutoLFM.Core.Maestro.RegisterInit("MainFrame", function()
+    -- Register commands
+    AutoLFM.Core.Maestro.RegisterCommand("UI.Toggle", AutoLFM.Logic.MainFrame.Toggle)
+    AutoLFM.Core.Maestro.RegisterCommand("UI.Show", AutoLFM.Logic.MainFrame.Show)
+    AutoLFM.Core.Maestro.RegisterCommand("UI.Hide", AutoLFM.Logic.MainFrame.Hide)
+    AutoLFM.Core.Maestro.RegisterCommand("Tabs.Select.Bottom", AutoLFM.Logic.MainFrame.SelectBottomTab, { silent = true })
+    AutoLFM.Core.Maestro.RegisterCommand("Tabs.Select.Side", AutoLFM.Logic.MainFrame.SelectSideTab, { silent = true })
+    AutoLFM.Core.Maestro.RegisterCommand("Tabs.Clear.All", AutoLFM.Logic.MainFrame.ClearAll)
+    AutoLFM.Core.Maestro.RegisterCommand("Tabs.Add.Preset", AutoLFM.Logic.MainFrame.AddPreset)
+end)

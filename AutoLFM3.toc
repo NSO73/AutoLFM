@@ -2,57 +2,36 @@
 ## Title: Auto|cff0070ddL|r|cffffffffF|cffff0000M|r 3.0
 ## Notes: Automated LFM Broadcaster
 ## Author: Gondoleon, NSO73
-## SavedVariables: V3_Settings, V3_Presets
-## OptionalDeps: pfQuest, ShaguTweaks
+## SavedVariables: V3_Settings
 ## Version: 3.0
 
-#=============================================================================
+#========================================
 # Core
-#=============================================================================
-Core\Commands.lua
-Core\Constants.lua
-Core\Events.lua
-Core\Init.lua
+#========================================
+Core\Common.lua
 Core\Maestro.lua
-Core\Persistent.lua
-Core\Utils.lua
+Core\Commands.lua
+Core\Init.lua
 
-#=============================================================================
+#========================================
 # Logic
-#=============================================================================
-Logic\Broadcaster.lua
-Logic\Group.lua
+#========================================
 Logic\MainFrame.lua
-Logic\Message.lua
-Logic\Roles.lua
-Logic\Selection.lua
-Logic\Content\Broadcasts.lua
-Logic\Content\Dungeons.lua
-Logic\Content\Options.lua
-Logic\Content\Presets.lua
-Logic\Content\Quests.lua
-Logic\Content\Raids.lua
 
-#=============================================================================
+#========================================
+# Components
+#========================================
+Components\DebugWindow.lua
+Components\MinimapButton.lua
+
+#========================================
 # UI
-#=============================================================================
-UI\MainFrame.xml
+#========================================
+UI\Content\AutoInvite.xml
 UI\Content\Broadcasts.xml
 UI\Content\Dungeons.xml
 UI\Content\Options.xml
 UI\Content\Presets.xml
 UI\Content\Quests.xml
 UI\Content\Raids.xml
-
-#=============================================================================
-# Components
-#=============================================================================
-Components\DarkUI.lua
-Components\MinimapButton.lua
-Components\WelcomePopup.lua
-
-#=============================================================================
-# Debug
-#=============================================================================
-Debug\DebugWindow.lua
-Debug\GroupTest.lua
+UI\MainFrame.xml
